@@ -1,17 +1,16 @@
 <?php
 namespace RdsSystem\Message;
 
-class ReleaseRequestBuildPatch extends Base
+class MigrationTask extends Base
 {
     public $project;
     public $version;
-    public $output;
     public $type;
 
-    public function __construct($project, $version, $output)
+    public function __construct($project, $version, $type)
     {
         $this->project = $project;
         $this->version = $version;
-        $this->output = $output;
+        $this->type = $type;
     }
 }

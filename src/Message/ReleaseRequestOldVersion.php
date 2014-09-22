@@ -1,7 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: anaumenko
- * Date: 15.09.14
- * Time: 18:39
- */ 
+namespace RdsSystem\Message;
+
+class ReleaseRequestOldVersion extends Base
+{
+    public $releaseRequestId;
+    public $version;
+
+    public function __construct($releaseRequestId, $version)
+    {
+        $this->releaseRequestId = $releaseRequestId;
+        $this->version = $version;
+    }
+}

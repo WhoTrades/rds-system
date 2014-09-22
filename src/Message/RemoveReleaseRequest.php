@@ -1,7 +1,7 @@
 <?php
 namespace RdsSystem\Message;
 
-class ReleaseRequestRemove extends Base
+class RemoveReleaseRequest extends Base
 {
     public $projectName;
     public $version;

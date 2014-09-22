@@ -1,7 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: anaumenko
- * Date: 15.09.14
- * Time: 18:38
- */ 
+namespace RdsSystem\Message;
+
+class ReleaseRequestCronConfig extends Base
+{
+    public $taskId;
+    public $text;
+
+    public function __construct($taskId, $text)
+    {
+        $this->taskId = $taskId;
+        $this->text = $text;
+    }
+}

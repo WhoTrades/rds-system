@@ -1,7 +1,18 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: anaumenko
- * Date: 15.09.14
- * Time: 18:39
- */ 
+namespace RdsSystem\Message;
+
+class ReleaseRequestMigrationStatus extends Base
+{
+    public $project;
+    public $version;
+    public $type;
+    public $status;
+
+    public function __construct($project, $version, $type, $status)
+    {
+        $this->project = $project;
+        $this->version = $version;
+        $this->type = $type;
+        $this->status = $status;
+    }
+}

@@ -1,7 +1,7 @@
 <?php
 namespace RdsSystem\Message;
 
-class ReleaseRequestStatusChanged extends Base
+class TaskStatusChanged extends Base
 {
     public $status;
     public $taskId;
