@@ -28,8 +28,8 @@ final class MessagingRdsMs
     /** @var AMQPConnection */
     private $connection;
 
-    /** @var AMQPChannel */
-    private $channel;
+    /** @var AMQPChannel[]*/
+    private $channels;
 
     public function __construct(\ServiceBase_IDebugLogger $debugLogger, $env = self::ENV_MAIN)
     {
@@ -37,7 +37,6 @@ final class MessagingRdsMs
         $this->env = $env;
 
         $this->connection = new AMQPConnection(self::HOST, self::PORT, self::USER, self::PASS, self::VHOST);
-        $this->channel = $this->createNewChannel(null);
     }
 
     private function declareAndGetQueueAndExchange($messageType)
@@ -53,6 +52,8 @@ final class MessagingRdsMs
         $rabbitMessage = new AMQPMessage(serialize($message));
         $channel = $this->createNewChannel($messageType);
         $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
+
+        return $channel;
     }
 
     /**
@@ -61,9 +62,8 @@ final class MessagingRdsMs
      */
     private function createNewChannel($messageType)
     {
-        static $channels = [];
-        if (isset($channels[(string)$messageType])) {
-            return $channels[$messageType];
+        if (isset($this->channels[(string)$messageType])) {
+            return $this->channels[$messageType];
         }
 
         $channel = $this->connection->channel();
@@ -72,14 +72,14 @@ final class MessagingRdsMs
         $channel->exchange_declare($exchangeName, 'direct', false, true, false);
         $channel->queue_bind($queueName, $exchangeName, $queueName);
 
-        return $channels[$messageType] = $channel;
+        return $this->channels[$messageType] = $channel;
     }
 
     private function readMessage($messageType, $callback, $sync = true)
     {
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
 
-        $channel = $sync ? $this->createNewChannel($messageType) : $this->channel;
+        $channel = $this->createNewChannel($messageType);
 
         $channel->basic_consume($queueName, $exchangeName, false, false, false, false, function($message) use ($callback, $channel) {
             $reply = unserialize($message->body);
@@ -98,17 +98,38 @@ final class MessagingRdsMs
     }
 
     /**
+     * @param AMQPChannel $channel. Ждет сообщений из канала. Если канал не передан - ждет сообщения изо всех инициированных каталов
      * @param null $count Максимальное количество сообщений, которые нужно получить
      */
-    public function waitForMessages($channel = null, $count = null, $timeout = 0)
+    public function waitForMessages(AMQPChannel $channel = null, $count = null, $timeout = 0)
     {
-        $channel = $channel ?: $this->channel;
-        while (count($channel->callbacks)) {
-            $channel->wait(null, true, $timeout);
-            if ($count > 0) {
-                $count--;
-                if ($count == 0) {
-                    break;
+        if ($channel) {
+            while (count($channel->callbacks)) {
+                $channel->wait(null, true, $timeout);
+                if ($count > 0) {
+                    $count--;
+                    if ($count == 0) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            $t = microtime(true);
+            for (;;) {
+                foreach ($this->channels as $key => $channel) {
+                    try {
+                        $channel->wait(null, true, 0.1);
+                        if ($count > 0) {
+                            $count--;
+                            if ($count == 0) {
+                                break;
+                            }
+                        }
+                    } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
+                        if ($timeout && (microtime(true) - $t > $timeout)) {
+                            throw $e;
+                        }
+                    }
                 }
             }
         }
@@ -261,6 +282,57 @@ final class MessagingRdsMs
         $this->writeMessage($message, $receiverName);
     }
 
+    /**
+     * Синхронный метод, который возвращает текущий статус запроса на релиз
+     * @param $releaseRequestId
+     * @return Message\ReleaseRequestCurrentStatusReply
+     */
+    public function getReleaseRequestStatus($releaseRequestId, $timeout = 30)
+    {
+        $request = new Message\ReleaseRequestCurrentStatusRequest($releaseRequestId);
+
+        $this->writeMessage($request);
+
+        $resultFetched = false;
+        $result = null;
+
+        $channel = $this->readMessage(Message\ReleaseRequestCurrentStatusReply::type(), function($message) use (&$result, &$resultFetched, $request) {
+            $this->debugLogger->message("Received ".json_encode($message));
+            if ($message->uniqueTag != $request->getUniqueTag()) {
+                $this->debugLogger->info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
+
+                if (microtime(true) - $message->timeCreated > 5) {
+                    $this->debugLogger->error("Dropping too old message ".json_encode($message));
+                    $message->accepted();
+                }
+
+                return;
+            }
+            $message->accepted();
+            $this->debugLogger->info("Got our packet $message->uniqueTag != {$request->getUniqueTag()}");
+
+            $resultFetched = true;
+            $result = $message;
+
+        }, false);
+
+        for (;;) {
+            try {
+                $channel->wait(null, true, $timeout);
+            } catch (\Exception $e) {
+                $this->debugLogger->message("Cancelling tag ".$this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                $channel->basic_cancel($this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                throw $e;
+            }
+
+            if ($resultFetched) {
+                $this->debugLogger->message("Cancelling tag ".$this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                $channel->basic_cancel($this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                return $result;
+            }
+        }
+    }
+
     /** Запрашивает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable" */
     public function sendCurrentStatusRequest(Message\ReleaseRequestCurrentStatusRequest $message)
     {
@@ -270,7 +342,7 @@ final class MessagingRdsMs
     /** Запрашивает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable" */
     public function readCurrentStatusRequest($sync, $callback)
     {
-        $this->readMessage(Message\ReleaseRequestCurrentStatusRequest::type(), $callback, $sync);
+        return $this->readMessage(Message\ReleaseRequestCurrentStatusRequest::type(), $callback, $sync);
     }
 
     /** Возвращает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable" */
@@ -283,11 +355,11 @@ final class MessagingRdsMs
     public function readCurrentStatusReplyOnce($callback)
     {
         $messageType = Message\ReleaseRequestCurrentStatusReply::type();
-        $channel = $this->readMessage($messageType, $callback, true);
-        $this->waitForMessages($channel, 1);
+        $channel = $this->readMessage($messageType, $callback, false);
+        $this->waitForMessages($channel, 100);
 
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
-        $this->channel->basic_cancel($exchangeName);
+        $channel->basic_cancel($exchangeName);
     }
 
     /** Запрашивает список всех проектов, используется сборщиком мусора */

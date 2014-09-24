@@ -3,9 +3,15 @@ namespace RdsSystem\Message;
 
 class Base
 {
-    /** @var \AMQPChannel*/
+    /** @var \PhpAmqpLib\Channel\AMQPChannel*/
     public $channel;
     public $deliveryTag;
+    public $timeCreated;
+
+    public function __construct()
+    {
+        $this->timeCreated = microtime(true);
+    }
 
     public static function type($receiverName = '*')
     {

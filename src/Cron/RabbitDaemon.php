@@ -5,6 +5,8 @@ use \RdsSystem\Model\Rabbit\MessagingRdsMs;
 
 abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
 {
+    const CHECK_STILL_CAN_RNU_INTERVAL = 5;
+
     public static function getCommandLineSpec()
     {
         return array(
@@ -20,12 +22,10 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
     {
         for (;;) {
             try {
-                $model->waitForMessages(null, null, (float)$cronJob->getOption('max-duration'));
+                $model->waitForMessages(null, null, self::CHECK_STILL_CAN_RNU_INTERVAL);
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
-                //$this->debugLogger->message("Checking can I run");
-                //$cronJob->checkStillCanRun();
-
-                return;
+                $this->debugLogger->insane("Checking can I run");
+                $cronJob->checkStillCanRun();
             }
         }
     }

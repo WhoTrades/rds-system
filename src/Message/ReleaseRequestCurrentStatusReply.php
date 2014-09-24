@@ -1,12 +1,14 @@
 <?php
 namespace RdsSystem\Message;
 
-class ReleaseRequestCurrentStatusReply extends Base
+class ReleaseRequestCurrentStatusReply extends RpcReply
 {
     public $status;
 
-    public function __construct($status)
+    public function __construct($status, $uniqueTag)
     {
         $this->status = $status;
+
+        parent::__construct($uniqueTag);
     }
 }
