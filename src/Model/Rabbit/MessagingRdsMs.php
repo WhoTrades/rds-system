@@ -48,9 +48,11 @@ final class MessagingRdsMs
 
     private function writeMessage(Message\Base $message, $receiverName = '*')
     {
-        list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($message->type($receiverName));
+        $messageType = $message->type($receiverName);
+        list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
         $rabbitMessage = new AMQPMessage(serialize($message));
-        $this->channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
+        $channel = $this->createNewChannel($messageType);
+        $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
     }
 
     /**
