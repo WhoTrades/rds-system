@@ -22,10 +22,9 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
     {
         for (;;) {
             try {
-                $model->waitForMessages(null, null, self::CHECK_STILL_CAN_RNU_INTERVAL);
+                $model->waitForMessages(null, null, $cronJob->getOption('max-duration'));
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
-                $this->debugLogger->insane("Checking can I run");
-                $cronJob->checkStillCanRun();
+                return 0;
             }
         }
     }

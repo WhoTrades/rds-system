@@ -41,7 +41,7 @@ final class MessagingRdsMs
 
     private function declareAndGetQueueAndExchange($messageType)
     {
-        $exchangeName = $queueName = $this->env.":".$messageType.":";
+        $exchangeName = $queueName = $this->getExchangeName($messageType);
         return [$exchangeName, $queueName];
     }
 
@@ -67,12 +67,17 @@ final class MessagingRdsMs
         }
 
         $channel = $this->connection->channel();
-        $exchangeName = $queueName = $this->env.":".$messageType.":";
+        $exchangeName = $queueName = $this->getExchangeName($messageType);
         $channel->queue_declare($queueName, false, true, false, false);
         $channel->exchange_declare($exchangeName, 'direct', false, true, false);
         $channel->queue_bind($queueName, $exchangeName, $queueName);
 
         return $this->channels[$messageType] = $channel;
+    }
+
+    private function getExchangeName($messageType)
+    {
+        return $this->env.":".$messageType.":";
     }
 
     private function readMessage($messageType, $callback, $sync = true)
@@ -320,14 +325,12 @@ final class MessagingRdsMs
             try {
                 $channel->wait(null, true, $timeout);
             } catch (\Exception $e) {
-                $this->debugLogger->message("Cancelling tag ".$this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
-                $channel->basic_cancel($this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                $channel->basic_cancel($this->getExchangeName(Message\ReleaseRequestCurrentStatusReply::type()));
                 throw $e;
             }
 
             if ($resultFetched) {
-                $this->debugLogger->message("Cancelling tag ".$this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
-                $channel->basic_cancel($this->env.":".Message\ReleaseRequestCurrentStatusReply::type().":");
+                $channel->basic_cancel($this->getExchangeName(Message\ReleaseRequestCurrentStatusReply::type()));
                 return $result;
             }
         }
