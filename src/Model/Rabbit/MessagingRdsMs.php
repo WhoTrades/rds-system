@@ -123,7 +123,9 @@ final class MessagingRdsMs
             for (;;) {
                 foreach ($this->channels as $key => $channel) {
                     try {
-                        $channel->wait(null, true, 0.1);
+                        for (;;){
+                            $channel->wait(null, true, 0.1);
+                        }
                         if ($count > 0) {
                             $count--;
                             if ($count == 0) {
@@ -234,9 +236,9 @@ final class MessagingRdsMs
     }
 
     /** Удаляет сборку из RDS, используется сборщиком мусора */
-    public function removeReleaseRequest($projectName, $version)
+    public function removeReleaseRequest(Message\RemoveReleaseRequest $message)
     {
-        return $this->sendRequest('removeReleaseRequest', array('projectName' => $projectName, 'version' => $version));
+        return $this->writeMessage($message);
     }
 
     /** Выдает новое задание на сборку */
@@ -393,6 +395,12 @@ final class MessagingRdsMs
     public function readGetProjectBuildsToDeleteRequest($sync, $callback)
     {
         $this->readMessage(Message\ProjectBuildsToDeleteRequest::type(), $callback, $sync);
+    }
+
+    /** Считывает все сборки, которые есть на ms машине для проверки какие из них можно удалять */
+    public function readRemoveReleaseRequest($sync, $callback)
+    {
+        $this->readMessage(Message\RemoveReleaseRequest::type(), $callback, $sync);
     }
 
     /** Отправляет все сборки, которые есть на ms машине для проверки какие из них можно удалять */
