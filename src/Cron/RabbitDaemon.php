@@ -15,6 +15,12 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
                 'default' => 300,
                 'valueRequired' => true,
             ],
+            'env' => [
+                'desc' => 'Some string, using at basename',
+                'default' => 'main',
+                'valueRequired' => true,
+                'useForBaseName' => true,
+            ]
         );
     }
 
@@ -27,5 +33,21 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
                 return 0;
             }
         }
+    }
+
+    /** @return MessagingRdsMs */
+    protected function getMessagingModel(\Cronjob\ICronjob $cronJob)
+    {
+        static $model = null;
+
+        if ($model !== null) {
+            return $model;
+        }
+
+        $rdsSystem = new \RdsSystem\Factory($this->debugLogger);
+        $this->debugLogger->message("Using env=".$cronJob->getOption('env'));
+        $model  = $rdsSystem->getMessagingRdsMsModel($cronJob->getOption('env'));
+
+        return $model;
     }
 }

@@ -25,6 +25,8 @@ final class MessagingRdsMs
 
     private $env;
 
+    private $stopped = false;
+
     /** @var AMQPConnection */
     private $connection;
 
@@ -102,6 +104,23 @@ final class MessagingRdsMs
         return $channel;
     }
 
+    public function stopReceivingMessages()
+    {
+        $this->stopped = true;
+
+        $this->cancelAll();
+    }
+
+    public function cancelAll()
+    {
+        foreach ($this->channels as $channel) {
+            foreach ($channel->callbacks as $tag => $callback) {
+                $this->debugLogger->message("Cancelling $tag");
+                $channel->basic_cancel($tag);
+            }
+        }
+    }
+
     /**
      * @param AMQPChannel $channel. Ждет сообщений из канала. Если канал не передан - ждет сообщения изо всех инициированных каталов
      * @param null $count Максимальное количество сообщений, которые нужно получить
@@ -125,6 +144,10 @@ final class MessagingRdsMs
                     try {
                         for (;;){
                             $channel->wait(null, true, 0.1);
+                            if ($this->stopped) {
+                                $this->stopped = false;
+                                return;
+                            }
                         }
                         if ($count > 0) {
                             $count--;
@@ -133,6 +156,10 @@ final class MessagingRdsMs
                             }
                         }
                     } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
+                        if ($this->stopped) {
+                            $this->stopped = false;
+                            return;
+                        }
                         if ($timeout && (microtime(true) - $t > $timeout)) {
                             throw $e;
                         }

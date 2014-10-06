@@ -15,12 +15,12 @@ final class Factory
     }
 
     /** @return Model\Rabbit\MessagingRdsMs */
-    public function getMessagingRdsMsModel()
+    public function getMessagingRdsMsModel($env = \RdsSystem\Model\Rabbit\MessagingRdsMs::ENV_MAIN)
     {
-        if ($this->messagingRdsMsModel === null) {
-            $this->messagingRdsMsModel = new Model\Rabbit\MessagingRdsMs($this->debugLogger);
+        if (empty($this->messagingRdsMsModel[$env])) {
+            $this->messagingRdsMsModel[$env] = new Model\Rabbit\MessagingRdsMs($this->debugLogger, $env);
         }
 
-        return $this->messagingRdsMsModel;
+        return $this->messagingRdsMsModel[$env];
     }
 }
