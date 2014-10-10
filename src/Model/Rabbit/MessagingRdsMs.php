@@ -462,4 +462,14 @@ final class MessagingRdsMs
     {
         $this->writeMessage($message);
     }
+
+    public function sendUnixSignal(Message\UnixSignal $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readUnixSignals($sync, $callback)
+    {
+        $this->readMessage(Message\UnixSignal::type(), $callback, $sync);
+    }
 }
