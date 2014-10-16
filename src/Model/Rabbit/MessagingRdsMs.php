@@ -453,4 +453,50 @@ final class MessagingRdsMs
     {
         return $this->sendRequest('getProjectBuildsToDelete', array('builds' => $allBuilds), true);
     }
+
+    /** Отправляет прогресс выполнения миграции */
+    public function sendHardMigrationProgress(Message\HardMigrationProgress $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    /** Вычитывает изменение прогресса выполнения тяжелых миграций */
+    public function readHardMigrationProgress($sync, $callback)
+    {
+        $this->readMessage(Message\HardMigrationProgress::type(), $callback, $sync);
+    }
+
+    /** Вычитывает изменение статуса выполнения тяжелых миграций */
+    public function readHardMigrationStatus($sync, $callback)
+    {
+        $this->readMessage(Message\HardMigrationStatus::type(), $callback, $sync);
+    }
+
+    /** Отправляет задачу на выполнение тяжелой миграции */
+    public function sendHardMigrationTask(Message\HardMigrationTask $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    /** Вычитывает задачи по накатыванию тяжелых миграций */
+    public function getHardMigrationTask($sync, $callback)
+    {
+        $this->readMessage(Message\HardMigrationTask::type(), $callback, $sync);
+    }
+
+    /** Отправляет изменение статуса тяжелой миграции */
+    public function sendHardMigrationStatus(Message\HardMigrationStatus $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function sendUnixSignal(Message\UnixSignal $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readUnixSignals($sync, $callback)
+    {
+        $this->readMessage(Message\UnixSignal::type(), $callback, $sync);
+    }
 }
