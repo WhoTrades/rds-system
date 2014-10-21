@@ -8,7 +8,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 final class MessagingRdsMs
 {
-    const HOST = 'rabbitmq-01.local';
+    const HOST = 'rds-rabbitmq-01.local';
     const PORT = 5672;
     const USER = 'rds';
     const PASS = 'rds';
