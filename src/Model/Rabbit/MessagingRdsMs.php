@@ -41,6 +41,11 @@ final class MessagingRdsMs
         $this->connection = new AMQPConnection(self::HOST, self::PORT, self::USER, self::PASS, self::VHOST);
     }
 
+    public function getEnv()
+    {
+        return $this->env;
+    }
+
     private function declareAndGetQueueAndExchange($messageType)
     {
         $exchangeName = $queueName = $this->getExchangeName($messageType);

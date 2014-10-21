@@ -5,6 +5,7 @@ class HardMigrationProgress extends Base
 {
     public $migration;
     public $progress;
+    public $action;
     public $pid;
 
     public function __construct($migration, $progress, $action, $pid)
