@@ -17,7 +17,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
             ],
             'env' => [
                 'desc' => 'Some string, using at basename',
-                'default' => 'main',
+                'default' => \Config::getInstance()->environment,
                 'valueRequired' => true,
                 'useForBaseName' => true,
             ]
