@@ -147,8 +147,8 @@ final class MessagingRdsMs
             for (;;) {
                 foreach ($this->channels as $key => $channel) {
                     try {
-                        for (;;){
-                            $channel->wait(null, true, 0.1);
+                        for ($i = 0; $i < 10; $i++){
+                            $channel->wait(null, true, 0.01);
                             if ($this->stopped) {
                                 $this->stopped = false;
                                 return;
