@@ -477,6 +477,12 @@ final class MessagingRdsMs
         $this->readMessage(Message\HardMigrationStatus::type(), $callback, $sync);
     }
 
+    /** Вычитывает новый кусок лога выполнения миграции */
+    public function readHardMigrationLogChunk($sync, $callback)
+    {
+        $this->readMessage(Message\HardMigrationLogChunk::type(), $callback, $sync);
+    }
+
     /** Отправляет задачу на выполнение тяжелой миграции */
     public function sendHardMigrationTask(Message\HardMigrationTask $message)
     {
@@ -491,6 +497,12 @@ final class MessagingRdsMs
 
     /** Отправляет изменение статуса тяжелой миграции */
     public function sendHardMigrationStatus(Message\HardMigrationStatus $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    /** Отправляет очередной кусок лога выполнения миграции */
+    public function sendHardMigrationLogChunk(Message\HardMigrationLogChunk $message)
     {
         $this->writeMessage($message);
     }
