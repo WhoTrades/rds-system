@@ -516,4 +516,64 @@ final class MessagingRdsMs
     {
         $this->readMessage(Message\UnixSignal::type(), $callback, $sync);
     }
+
+    public function sendUnixSignalToGroup(Message\UnixSignalToGroup $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readUnixSignalsToGroup($sync, $callback)
+    {
+        $this->readMessage(Message\UnixSignalToGroup::type(), $callback, $sync);
+    }
+
+    public function sendMaintenanceToolStart(Message\MaintenanceTool\Start $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readMaintenanceToolStart($sync, $callback)
+    {
+        $this->readMessage(Message\MaintenanceTool\Start::type(), $callback, $sync);
+    }
+
+    public function sendMaintenanceToolKill(Message\MaintenanceTool\Kill $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readMaintenanceToolChangeStatus($sync, $callback)
+    {
+        $this->readMessage(Message\MaintenanceTool\ChangeStatus::type(), $callback, $sync);
+    }
+
+    public function sendMaintenanceToolLogChunk(Message\MaintenanceTool\LogChunk $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readMaintenanceToolLogChunk($sync, $callback)
+    {
+        $this->readMessage(Message\MaintenanceTool\LogChunk::type(), $callback, $sync);
+    }
+
+    public function sendPreProdDown(Message\PreProd\Down $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readPreProdDown($sync, $callback)
+    {
+        $this->readMessage(Message\PreProd\Down::type(), $callback, $sync);
+    }
+
+    public function sendPreProdUp(Message\PreProd\Up $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readPreProdUp($sync, $callback)
+    {
+        $this->readMessage(Message\PreProd\Up::type(), $callback, $sync);
+    }
 }
