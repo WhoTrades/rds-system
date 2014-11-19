@@ -537,7 +537,7 @@ final class MessagingRdsMs
         $this->readMessage(Message\MaintenanceTool\Start::type(), $callback, $sync);
     }
 
-    public function sendMaintenanceToolKill(Message\MaintenanceTool\Kill $message)
+    public function sendMaintenanceToolChangeStatus(Message\MaintenanceTool\ChangeStatus $message)
     {
         $this->writeMessage($message);
     }
