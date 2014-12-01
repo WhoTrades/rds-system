@@ -46,6 +46,14 @@ final class MessagingRdsMs
         return $this->env;
     }
 
+    public function ping()
+    {
+        if (!$this->connection->isConnected()) {
+            $this->debugLogger->error("Lost connection to rabbitmq-server, reconnicting...");
+            $this->connection->reconnect();
+        }
+    }
+
     private function declareAndGetQueueAndExchange($messageType)
     {
         $exchangeName = $queueName = $this->getExchangeName($messageType);
@@ -54,6 +62,8 @@ final class MessagingRdsMs
 
     private function writeMessage(Message\Base $message, $receiverName = '*')
     {
+        $this->ping();
+
         $messageType = $message->type($receiverName);
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
         $rabbitMessage = new AMQPMessage(serialize($message));
@@ -69,6 +79,8 @@ final class MessagingRdsMs
      */
     private function createNewChannel($messageType)
     {
+        $this->ping();
+
         if (isset($this->channels[(string)$messageType])) {
             return $this->channels[$messageType];
         }
@@ -118,6 +130,8 @@ final class MessagingRdsMs
 
     public function cancelAll()
     {
+        $this->ping();
+
         foreach ($this->channels as $channel) {
             foreach ($channel->callbacks as $tag => $callback) {
                 $this->debugLogger->message("Cancelling $tag");
