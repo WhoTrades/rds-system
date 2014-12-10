@@ -583,4 +583,23 @@ final class MessagingRdsMs
     {
         $this->readMessage(Message\PreProd\Up::type(), $callback, $sync);
     }
+
+    public function sendMergeTask(Message\Merge\Task $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readMergeTask($sync, $callback)
+    {
+        $this->readMessage(Message\Merge\Task::type(), $callback, $sync);
+    }
+    public function sendMergeTaskResult(Message\Merge\TaskResult $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readMergeTaskResult($sync, $callback)
+    {
+        $this->readMessage(Message\Merge\TaskResult::type(), $callback, $sync);
+    }
 }
