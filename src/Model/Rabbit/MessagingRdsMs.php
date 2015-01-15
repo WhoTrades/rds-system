@@ -602,4 +602,23 @@ final class MessagingRdsMs
     {
         $this->readMessage(Message\Merge\TaskResult::type(), $callback, $sync);
     }
+
+    public function sendDropBranches(Message\Merge\DropBranches $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readDropBranches($sync, $callback)
+    {
+        $this->readMessage(Message\Merge\DropBranches::type(), $callback, $sync);
+    }
+    public function sendDroppedBranches(Message\Merge\DroppedBranches $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    public function readDroppedBranches($sync, $callback)
+    {
+        $this->readMessage(Message\Merge\DroppedBranches::type(), $callback, $sync);
+    }
 }
