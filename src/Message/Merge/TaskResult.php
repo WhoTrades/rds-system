@@ -8,13 +8,15 @@ class TaskResult extends \RdsSystem\Message\Base
     public $errors = [];
     public $targetBranch;
     public $sourceBranch;
+    public $type;
 
-    public function __construct($featureId, $sourceBranch, $targetBranch, $status, $errors)
+    public function __construct($featureId, $sourceBranch, $targetBranch, $status, $errors, $type)
     {
         $this->featureId    = $featureId;
         $this->status       = $status;
         $this->errors       = $errors;
         $this->targetBranch = $targetBranch;
         $this->sourceBranch = $sourceBranch;
+        $this->type         = $type;
     }
 }
