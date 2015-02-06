@@ -593,6 +593,12 @@ final class MessagingRdsMs
     {
         $this->readMessage(Message\Merge\Task::type(), $callback, $sync);
     }
+
+    public function sendMergeCreateBranch(Message\Merge\CreateBranch $message)
+    {
+        $this->writeMessage($message);
+    }
+
     public function sendMergeTaskResult(Message\Merge\TaskResult $message)
     {
         $this->writeMessage($message);
@@ -601,6 +607,11 @@ final class MessagingRdsMs
     public function readMergeTaskResult($sync, $callback)
     {
         $this->readMessage(Message\Merge\TaskResult::type(), $callback, $sync);
+    }
+
+    public function readMergeCreateBranch($sync, $callback)
+    {
+        $this->readMessage(Message\Merge\CreateBranch::type(), $callback, $sync);
     }
 
     public function sendDropBranches(Message\Merge\DropBranches $message)
