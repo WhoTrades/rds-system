@@ -116,6 +116,53 @@ final class MessagingRdsMs
         return $channel;
     }
 
+    /**
+     * @param Message\RpcRequest $request
+     * @param string $replyType
+     * @param int $timeout
+     *
+     * @return Message\RpcReply
+     */
+    private function jsonRpcCall(Message\RpcRequest $request, $replyType, $timeout = 30)
+    {
+        $this->writeMessage($request);
+
+        $result = [];
+
+        $channel = $this->readMessage($replyType, function(Message\RpcReply $message) use (&$result, &$resultFetched, $request, $timeout) {
+            $this->debugLogger->message("Received ".json_encode($message));
+            if ($message->uniqueTag != $request->getUniqueTag()) {
+                $this->debugLogger->info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
+
+                if (microtime(true) - $message->timeCreated > $timeout) {
+                    $this->debugLogger->error("Dropping too old message ".json_encode($message));
+                    $message->accepted();
+                }
+
+                return;
+            }
+            $message->accepted();
+            $this->debugLogger->info("Got our packet $message->uniqueTag == {$request->getUniqueTag()}");
+
+            $resultFetched = true;
+            $result = $message;
+
+        }, false);
+
+        for (;;) {
+            try {
+                $channel->wait(null, true, $timeout);
+            } catch (\Exception $e) {
+                $channel->basic_cancel($this->getExchangeName($replyType));
+            }
+
+            if ($resultFetched) {
+                $channel->basic_cancel($this->getExchangeName($replyType));
+                return $result;
+            }
+        }
+    }
+
     public function stopReceivingMessages()
     {
         $this->stopped = true;
@@ -342,7 +389,7 @@ final class MessagingRdsMs
         $resultFetched = false;
         $result = null;
 
-        $channel = $this->readMessage(Message\ReleaseRequestCurrentStatusReply::type(), function($message) use (&$result, &$resultFetched, $request) {
+        $channel = $this->readMessage(Message\ReleaseRequestCurrentStatuReleaseRequestCurrentStatusReplysReply::type(), function($message) use (&$result, &$resultFetched, $request) {
             $this->debugLogger->message("Received ".json_encode($message));
             if ($message->uniqueTag != $request->getUniqueTag()) {
                 $this->debugLogger->info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
@@ -631,5 +678,47 @@ final class MessagingRdsMs
     public function readDroppedBranches($sync, $callback)
     {
         $this->readMessage(Message\Merge\DroppedBranches::type(), $callback, $sync);
+    }
+
+    #Tool maintenance
+
+    /**
+     * Синхронный метод, который убивает процессы и возвращает список убитых
+     * @param $releaseRequestId
+     * @return Message\Tool\KillResult
+     */
+    public function sendToolKillTask(Message\Tool\KillTask $task, $resultType, $timeout = 30)
+    {
+        return $this->jsonRpcCall($task,$resultType, $timeout);
+    }
+
+    public function sendToolKillResult(Message\Tool\KillResult $result)
+    {
+        $this->writeMessage($result);
+    }
+
+    public function readToolKillTaskRequest($sync, $callback)
+    {
+        return $this->readMessage(Message\Tool\KillTask::type(), $callback, $sync);
+    }
+
+    /**
+     * Синхронный метод, который возвращает информацию о работающих процессах
+     * @param $releaseRequestId
+     * @return Message\Tool\GetInfoResult
+     */
+    public function sendToolGetInfoTask(Message\Tool\GetInfoTask $task, $resultType, $timeout = 30)
+    {
+        return $this->jsonRpcCall($task,$resultType, $timeout);
+    }
+
+    public function sendToolGetInfoResult(Message\Tool\GetInfoResult $result)
+    {
+        $this->writeMessage($result);
+    }
+
+    public function readToolGetInfoTaskRequest($sync, $callback)
+    {
+        return $this->readMessage(Message\Tool\GetInfoTask::type(), $callback, $sync);
     }
 }
