@@ -22,4 +22,9 @@ class Base
     {
         $this->channel->basic_ack($this->deliveryTag);
     }
+
+    public function retry()
+    {
+        $this->channel->basic_recover(true);
+    }
 }
