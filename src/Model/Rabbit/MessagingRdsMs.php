@@ -252,6 +252,18 @@ final class MessagingRdsMs
         $this->readMessage(Message\ReleaseRequestBuildPatch::type(), $callback, $sync);
     }
 
+    /** Отправление задачи на отправку нового конфига */
+    public function sendProjectConfig(Message\ProjectConfig $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    /** Сообщает RDS об новых коммитах, которые попали в сборку */
+    public function readProjectConfig($sync = true, $callback)
+    {
+        $this->readMessage(Message\ProjectConfig::type(), $callback, $sync);
+    }
+
     /** Сообщает RDS список новых pre и post миграций, которые попали в сборку */
     public function sendMigrations(Message\ReleaseRequestMigrations $message)
     {
