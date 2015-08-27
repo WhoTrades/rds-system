@@ -17,7 +17,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
             ],
             'env' => [
                 'desc' => 'Some string, using at basename',
-                'default' => \Config::getInstance()->environment,
+                'default' => \RdsSystem\Model\Rabbit\MessagingRdsMs::ENV_MAIN,
                 'valueRequired' => true,
                 'useForBaseName' => true,
             ]
