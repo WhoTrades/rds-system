@@ -154,6 +154,7 @@ final class MessagingRdsMs
                 $channel->wait(null, true, $timeout);
             } catch (\Exception $e) {
                 $channel->basic_cancel($this->getExchangeName($replyType));
+                throw $e;
             }
 
             if ($resultFetched) {
@@ -724,7 +725,23 @@ final class MessagingRdsMs
         return $this->jsonRpcCall($task,$resultType, $timeout);
     }
 
+    /**
+     * Синхронный метод, который возвращает последие $linesCount строк лога работы тула
+     * @param $tag
+     * @param $linesCount
+     * @return Message\Tool\ToolLogTailResult
+     */
+    public function sendToolGetToolLogTail(Message\Tool\ToolLogTail $task, $resultType, $timeout = 30)
+    {
+        return $this->jsonRpcCall($task, $resultType, $timeout);
+    }
+
     public function sendToolGetInfoResult(Message\Tool\GetInfoResult $result)
+    {
+        $this->writeMessage($result);
+    }
+
+    public function sendToolGetToolLogTailResult(Message\Tool\ToolLogTailResult $result)
     {
         $this->writeMessage($result);
     }
@@ -732,5 +749,13 @@ final class MessagingRdsMs
     public function readToolGetInfoTaskRequest($sync, $callback)
     {
         return $this->readMessage(Message\Tool\GetInfoTask::type(), $callback, $sync);
+    }
+    public function readToolGetToolLogTail($sync, $callback)
+    {
+        return $this->readMessage(Message\Tool\ToolLogTail::type(), $callback, $sync);
+    }
+    public function readToolGetToolLogTailResult($sync, $callback)
+    {
+        return $this->readMessage(Message\Tool\ToolLogTailResult::type(), $callback, $sync);
     }
 }
