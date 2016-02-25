@@ -758,4 +758,14 @@ final class MessagingRdsMs
     {
         return $this->readMessage(Message\Tool\ToolLogTailResult::type(), $callback, $sync);
     }
+
+    public function sendPDevSwitchBranch(Message\PDev\SwitchBranch $task)
+    {
+        $this->writeMessage($task);
+    }
+
+    public function readPDevSwitchBranch($sync, $callback)
+    {
+        return $this->readMessage(Message\PDev\SwitchBranch::type(), $callback, $sync);
+    }
 }
