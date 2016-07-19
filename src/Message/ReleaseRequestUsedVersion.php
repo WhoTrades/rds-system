@@ -6,13 +6,23 @@ class ReleaseRequestUsedVersion extends Base
     public $worker;
     public $project;
     public $version;
-    public $status;
+    public $initiatorUserName;
 
-    public function __construct($worker, $project, $version, $status)
+    /**
+     * ReleaseRequestUsedVersion constructor.
+     *
+     * @param string $worker
+     * @param int $project
+     * @param string $version
+     * @param string $initiatorUserName
+     */
+    public function __construct($worker, $project, $version, $initiatorUserName)
     {
         $this->worker = $worker;
         $this->project = $project;
         $this->version = $version;
-        $this->status = $status;
+        $this->initiatorUserName = $initiatorUserName;
+
+        parent::__construct();
     }
 }
