@@ -337,21 +337,23 @@ final class MessagingRdsMs
 
     /**
      * Выдает новое задание на миграцию
+     * @param string                $workerName
      * @param Message\MigrationTask $message
      */
-    public function sendMigrationTask(Message\MigrationTask $message)
+    public function sendMigrationTask($workerName, Message\MigrationTask $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $workerName);
     }
 
     /**
      * Читает новое задание на миграцию
+     * @param string   $workerName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function getMigrationTask($sync, $callback)
+    public function getMigrationTask($workerName, $sync, $callback)
     {
-        $this->readMessage(Message\MigrationTask::type(), $callback, $sync);
+        $this->readMessage(Message\MigrationTask::type($workerName), $callback, $sync);
     }
 
     /**
@@ -628,21 +630,23 @@ final class MessagingRdsMs
 
     /**
      * Отправляет задачу на выполнение тяжелой миграции
+     * @param string   $receiverName
      * @param Message\HardMigrationTask $message
      */
-    public function sendHardMigrationTask(Message\HardMigrationTask $message)
+    public function sendHardMigrationTask($receiverName, Message\HardMigrationTask $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
      * Вычитывает задачи по накатыванию тяжелых миграций
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function getHardMigrationTask($sync, $callback)
+    public function getHardMigrationTask($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\HardMigrationTask::type(), $callback, $sync);
+        $this->readMessage(Message\HardMigrationTask::type($receiverName), $callback, $sync);
     }
 
     /**
@@ -664,54 +668,59 @@ final class MessagingRdsMs
     }
 
     /**
+     * @param string $receiverName
      * @param Message\UnixSignal $message
      */
-    public function sendUnixSignal(Message\UnixSignal $message)
+    public function sendUnixSignal($receiverName, Message\UnixSignal $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readUnixSignals($sync, $callback)
+    public function readUnixSignals($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\UnixSignal::type(), $callback, $sync);
+        $this->readMessage(Message\UnixSignal::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string                    $receiverName
      * @param Message\UnixSignalToGroup $message
      */
-    public function sendUnixSignalToGroup(Message\UnixSignalToGroup $message)
+    public function sendUnixSignalToGroup($receiverName, Message\UnixSignalToGroup $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readUnixSignalsToGroup($sync, $callback)
+    public function readUnixSignalsToGroup($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\UnixSignalToGroup::type(), $callback, $sync);
+        $this->readMessage(Message\UnixSignalToGroup::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string                        $receiverName
      * @param Message\MaintenanceTool\Start $message
      */
-    public function sendMaintenanceToolStart(Message\MaintenanceTool\Start $message)
+    public function sendMaintenanceToolStart($receiverName, Message\MaintenanceTool\Start $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readMaintenanceToolStart($sync, $callback)
+    public function readMaintenanceToolStart($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\MaintenanceTool\Start::type(), $callback, $sync);
+        $this->readMessage(Message\MaintenanceTool\Start::type($receiverName), $callback, $sync);
     }
 
     /**
@@ -783,71 +792,79 @@ final class MessagingRdsMs
     }
 
     /**
+     * @param string             $receiverName
      * @param Message\Merge\Task $message
      */
-    public function sendMergeTask(Message\Merge\Task $message)
+    public function sendMergeTask($receiverName, Message\Merge\Task $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readMergeTask($sync, $callback)
+    public function readMergeTask($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Merge\Task::type(), $callback, $sync);
+        $this->readMessage(Message\Merge\Task::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string                     $receiverName
      * @param Message\Merge\CreateBranch $message
      */
-    public function sendMergeCreateBranch(Message\Merge\CreateBranch $message)
+    public function sendMergeCreateBranch($receiverName, Message\Merge\CreateBranch $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string                   $receiverName
      * @param Message\Merge\TaskResult $message
      */
-    public function sendMergeTaskResult(Message\Merge\TaskResult $message)
+    public function sendMergeTaskResult($receiverName, Message\Merge\TaskResult $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readMergeTaskResult($sync, $callback)
+    public function readMergeTaskResult($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Merge\TaskResult::type(), $callback, $sync);
+        $this->readMessage(Message\Merge\TaskResult::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readMergeCreateBranch($sync, $callback)
+    public function readMergeCreateBranch($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Merge\CreateBranch::type(), $callback, $sync);
+        $this->readMessage(Message\Merge\CreateBranch::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string                     $receiverName
      * @param Message\Merge\DropBranches $message
      */
-    public function sendDropBranches(Message\Merge\DropBranches $message)
+    public function sendDropBranches($receiverName, Message\Merge\DropBranches $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readDropBranches($sync, $callback)
+    public function readDropBranches($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Merge\DropBranches::type(), $callback, $sync);
+        $this->readMessage(Message\Merge\DropBranches::type($receiverName), $callback, $sync);
     }
 
     /**
@@ -871,6 +888,7 @@ final class MessagingRdsMs
 
     /**
      * Синхронный метод, который убивает процессы и возвращает список убитых
+     * @param string                $receiverName
      * @param Message\Tool\KillTask $task
      * @param string                $resultType
      * @param int                   $timeout
@@ -879,9 +897,9 @@ final class MessagingRdsMs
      *
      * @return Message\Tool\KillResult
      */
-    public function sendToolKillTask(Message\Tool\KillTask $task, $resultType, $timeout = null)
+    public function sendToolKillTask($receiverName, Message\Tool\KillTask $task, $resultType, $timeout = null)
     {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30);
+        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
     }
 
     /**
@@ -893,16 +911,18 @@ final class MessagingRdsMs
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readToolKillTaskRequest($sync, $callback)
+    public function readToolKillTaskRequest($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Tool\KillTask::type(), $callback, $sync);
+        $this->readMessage(Message\Tool\KillTask::type($receiverName), $callback, $sync);
     }
 
     /**
      * Синхронный метод, который возвращает информацию о работающих процессах
+     * @param string                   $receiverName
      * @param Message\Tool\GetInfoTask $task
      * @param string                   $resultType
      * @param int                      $timeout
@@ -910,13 +930,14 @@ final class MessagingRdsMs
      * @return Message\Tool\GetInfoResult
      * @throws \Exception
      */
-    public function sendToolGetInfoTask(Message\Tool\GetInfoTask $task, $resultType, $timeout = null)
+    public function sendToolGetInfoTask($receiverName, Message\Tool\GetInfoTask $task, $resultType, $timeout = null)
     {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30);
+        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
     }
 
     /**
      * Синхронный метод, который возвращает последие $linesCount строк лога работы тула
+     * @param string                   $receiverName
      * @param Message\Tool\ToolLogTail $task
      * @param string                   $resultType
      * @param int                      $timeout
@@ -924,9 +945,9 @@ final class MessagingRdsMs
      * @return array
      * @throws \Exception
      */
-    public function sendToolGetToolLogTail(Message\Tool\ToolLogTail $task, $resultType, $timeout = null)
+    public function sendToolGetToolLogTail($receiverName, Message\Tool\ToolLogTail $task, $resultType, $timeout = null)
     {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30);
+        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
     }
 
     /**
@@ -946,30 +967,23 @@ final class MessagingRdsMs
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readToolGetInfoTaskRequest($sync, $callback)
+    public function readToolGetInfoTaskRequest($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Tool\GetInfoTask::type(), $callback, $sync);
+        $this->readMessage(Message\Tool\GetInfoTask::type($receiverName), $callback, $sync);
     }
 
     /**
+     * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readToolGetToolLogTail($sync, $callback)
+    public function readToolGetToolLogTail($receiverName, $sync, $callback)
     {
-        $this->readMessage(Message\Tool\ToolLogTail::type(), $callback, $sync);
-    }
-
-    /**
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readToolGetToolLogTailResult($sync, $callback)
-    {
-        $this->readMessage(Message\Tool\ToolLogTailResult::type(), $callback, $sync);
+        $this->readMessage(Message\Tool\ToolLogTail::type($receiverName), $callback, $sync);
     }
 
     /**
@@ -1011,6 +1025,8 @@ final class MessagingRdsMs
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
         $rabbitMessage = new AMQPMessage(serialize($message));
         $channel = $this->createNewChannel($messageType);
+
+        $this->debugLogger->message("Sending to $messageType");
         $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
 
         return $channel;
@@ -1049,6 +1065,7 @@ final class MessagingRdsMs
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
 
         $channel = $this->createNewChannel($messageType);
+        $this->debugLogger->message("Listening $queueName [$exchangeName]");
 
         $channel->basic_consume($queueName, $exchangeName, false, false, false, false, function ($message) use ($callback, $channel) {
             $reply = unserialize($message->body);
@@ -1074,10 +1091,10 @@ final class MessagingRdsMs
      * @return array
      * @throws \Exception
      */
-    private function jsonRpcCall(Message\RpcRequest $request, $replyType, $timeout = null)
+    private function jsonRpcCall(Message\RpcRequest $request, $replyType, $timeout = null, $receiverName = '*')
     {
         $timeout = $timeout ?: 30;
-        $this->writeMessage($request);
+        $this->writeMessage($request, $receiverName);
 
         $result = [];
 

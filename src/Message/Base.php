@@ -13,9 +13,14 @@ class Base
         $this->timeCreated = microtime(true);
     }
 
+    /**
+     * @param string $receiverName
+     *
+     * @return string
+     */
     public static function type($receiverName = '*')
     {
-        return get_called_class()."::".$receiverName;
+        return get_called_class() . "::" . $receiverName;
     }
 
     public function accepted()
