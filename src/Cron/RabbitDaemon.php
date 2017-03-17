@@ -45,7 +45,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
         }
 
         $rdsSystem = new \RdsSystem\Factory($this->debugLogger);
-        $this->debugLogger->message("Using env=".$cronJob->getOption('env'));
+        $this->debugLogger->message("Using env=" . $cronJob->getOption('env'));
         $model  = $rdsSystem->getMessagingRdsMsModel($cronJob->getOption('env'));
 
         return $model;
