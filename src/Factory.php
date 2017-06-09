@@ -12,14 +12,22 @@ final class Factory
     /** @var */
     private $messagingRdsMsModel;
 
+    /**
+     * Factory constructor.
+     * @param ServiceBase_IDebugLogger $debugLogger
+     */
     public function __construct(\ServiceBase_IDebugLogger $debugLogger)
     {
         $this->debugLogger = $debugLogger;
     }
 
-    /** @return MessagingRdsMs */
-    public function getMessagingRdsMsModel($env = MessagingRdsMs::ENV_MAIN)
+    /**
+     * @param string $env
+     * @return MessagingRdsMs
+     */
+    public function getMessagingRdsMsModel($env = null)
     {
+        $env = $env ?? MessagingRdsMs::ENV_MAIN;
         if (empty($this->messagingRdsMsModel[$env])) {
             $this->messagingRdsMsModel[$env] = new MessagingRdsMs($this->debugLogger, $env);
         }

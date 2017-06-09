@@ -9,6 +9,7 @@ class CommandExecutorException extends \ApplicationException
     /**
      * CommandExecutorException constructor.
      *
+     * @param string $command
      * @param string|null $message
      * @param int $code
      * @param string $output
@@ -29,9 +30,11 @@ class CommandExecutorException extends \ApplicationException
         return $this->output;
     }
 
+    /**
+     * @return string
+     */
     public function getCommand()
     {
         return $this->command;
     }
 }
-
