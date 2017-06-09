@@ -8,15 +8,14 @@ class BuildTask extends Base
     public $version;
     public $release;
     public $lastBuildTag;
-    public $installToPreProd;
+    public $scriptMigrationNew;
 
-    public function __construct($id, $project, $version, $release, $lastBuildTag, $installToPreProd)
+    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew = '')
     {
         $this->id = $id;
         $this->project = $project;
         $this->version = $version;
         $this->release = $release;
-        $this->lastBuildTag = $lastBuildTag;
-        $this->installToPreProd = $installToPreProd;
+        $this->scriptMigrationNew = $scriptMigrationNew;
     }
 }

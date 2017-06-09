@@ -5,7 +5,7 @@ class CommandExecutor
 {
     /** @var \ServiceBase_IDebugLogger */
 	private $debugLogger;
-	
+
 	public function __construct($debugLogger)
 	{
 		$this->debugLogger = $debugLogger;
@@ -18,7 +18,7 @@ class CommandExecutor
 		$text = implode("\n", $output);
 
 		if ($returnVar) {
-			throw new CommandExecutorException("Return var is non-zero, code=".$returnVar.", command=$command", $returnVar, $text);
+			throw new CommandExecutorException($command, "Return var is non-zero, code=".$returnVar.", command=$command", $returnVar, $text);
 		}
 
 		return $text;

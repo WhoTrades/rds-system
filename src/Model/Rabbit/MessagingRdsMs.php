@@ -986,25 +986,6 @@ final class MessagingRdsMs
         $this->readMessage(Message\Tool\ToolLogTail::type($receiverName), $callback, $sync);
     }
 
-    /**
-     * Отправляет задачу на переключение ветки на pdev контуре
-     * @param Message\PDev\SwitchBranch $task
-     */
-    public function sendPDevSwitchBranch(Message\PDev\SwitchBranch $task)
-    {
-        $this->writeMessage($task);
-    }
-
-    /**
-     * Вычитывает задачу на переключение ветки на pdev контуре
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readPDevSwitchBranch($sync, $callback)
-    {
-        $this->readMessage(Message\PDev\SwitchBranch::type(), $callback, $sync);
-    }
-
     private function declareAndGetQueueAndExchange($messageType)
     {
         $exchangeName = $queueName = $this->getExchangeName($messageType);

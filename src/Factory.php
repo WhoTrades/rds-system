@@ -1,9 +1,12 @@
 <?php
 namespace RdsSystem;
 
+use \RdsSystem\Model\Rabbit\MessagingRdsMs;
+use ServiceBase_IDebugLogger;
+
 final class Factory
 {
-    /** @var \ServiceBase_IDebugLogger */
+    /** @var ServiceBase_IDebugLogger */
     private $debugLogger;
 
     /** @var */
@@ -14,11 +17,11 @@ final class Factory
         $this->debugLogger = $debugLogger;
     }
 
-    /** @return Model\Rabbit\MessagingRdsMs */
-    public function getMessagingRdsMsModel($env = \RdsSystem\Model\Rabbit\MessagingRdsMs::ENV_MAIN)
+    /** @return MessagingRdsMs */
+    public function getMessagingRdsMsModel($env = MessagingRdsMs::ENV_MAIN)
     {
         if (empty($this->messagingRdsMsModel[$env])) {
-            $this->messagingRdsMsModel[$env] = new Model\Rabbit\MessagingRdsMs($this->debugLogger, $env);
+            $this->messagingRdsMsModel[$env] = new MessagingRdsMs($this->debugLogger, $env);
         }
 
         return $this->messagingRdsMsModel[$env];
