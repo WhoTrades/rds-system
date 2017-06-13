@@ -25,6 +25,7 @@ class BuildTask extends Base
         $this->project = $project;
         $this->version = $version;
         $this->release = $release;
+        $this->lastBuildTag = $lastBuildTag;
         $this->scriptMigrationNew = $scriptMigrationNew;
 
         parent::__construct();
