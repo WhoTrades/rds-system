@@ -1,7 +1,7 @@
 <?php
 namespace RdsSystem\Message;
 
-class BuildTask extends Base
+class BuildTask extends AbstractMultiServerTask
 {
     public $id;
     public $project;
@@ -18,8 +18,9 @@ class BuildTask extends Base
      * @param string $release
      * @param string $lastBuildTag
      * @param string $scriptMigrationNew
+     * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew)
+    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew, array $projectServers)
     {
         $this->id = $id;
         $this->project = $project;
@@ -28,6 +29,6 @@ class BuildTask extends Base
         $this->lastBuildTag = $lastBuildTag;
         $this->scriptMigrationNew = $scriptMigrationNew;
 
-        parent::__construct();
+        parent::__construct($projectServers);
     }
 }

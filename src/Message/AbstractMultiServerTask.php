@@ -1,0 +1,32 @@
+<?php
+/**
+ * @package RdsSystem\Message
+ */
+namespace RdsSystem\Message;
+
+class AbstractMultiServerTask extends Base
+{
+    /**
+     * @var array
+     */
+    protected $projectServers = [];
+
+    /**
+     * AbstractMultiServerTask constructor.
+     *
+     * @param array $projectServers
+     */
+    public function __construct(array $projectServers)
+    {
+        $this->projectServers = $projectServers;
+        parent::__construct();
+    }
+
+    /**
+     * @return array
+     */
+    public function getProjectServers()
+    {
+        return $this->projectServers;
+    }
+}
