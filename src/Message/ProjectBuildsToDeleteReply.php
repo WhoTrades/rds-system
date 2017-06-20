@@ -3,17 +3,20 @@ namespace RdsSystem\Message;
 
 class ProjectBuildsToDeleteReply extends AbstractMultiServerTask
 {
-    public $buildToDelete;
+    public $project;
+    public $version;
 
     /**
      * ProjectBuildsToDeleteReply constructor.
      *
-     * @param array $buildToDelete
+     * @param string $project
+     * @param string $version
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($buildToDelete, array $projectServers)
+    public function __construct($project, $version, array $projectServers)
     {
-        $this->buildToDelete = $buildToDelete;
+        $this->project = $project;
+        $this->version = $version;
 
         parent::__construct($projectServers);
     }

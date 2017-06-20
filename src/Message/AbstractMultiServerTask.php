@@ -9,7 +9,7 @@ class AbstractMultiServerTask extends Base
     /**
      * @var array
      */
-    protected $projectServers = [];
+    public $projectServers = [];
 
     /**
      * AbstractMultiServerTask constructor.
