@@ -10,6 +10,7 @@ class ProjectConfig extends Base
 {
     public $project;
     public $configs = [];
+    public $scriptUploadConfigLocal = '';
 
     /**
      * ProjectConfig constructor.
@@ -20,11 +21,13 @@ class ProjectConfig extends Base
      *    'config2.local.php' => '<?php ...',
      *    'config3.local.php' => '<?php ...',
      * )
+     * @param string $scriptUploadConfigLocal - sh скрипт по заливке конфигурации на сервера
      */
-    public function __construct($project, array $configs)
+    public function __construct($project, array $configs, $scriptUploadConfigLocal)
     {
         $this->project  = $project;
         $this->configs   = $configs;
+        $this->scriptUploadConfigLocal   = $scriptUploadConfigLocal;
 
         parent::__construct();
     }

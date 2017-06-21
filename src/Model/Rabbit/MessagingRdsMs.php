@@ -173,21 +173,23 @@ final class MessagingRdsMs
 
     /**
      * Отправление задачи на отправку нового конфига
+     * @param string $receiverName
      * @param Message\ProjectConfig $message
      */
-    public function sendProjectConfig(Message\ProjectConfig $message)
+    public function sendProjectConfig(string $receiverName, Message\ProjectConfig $message)
     {
-        $this->writeMessage($message);
+        $this->writeMessage($message, $receiverName);
     }
 
     /**
      * Сообщает RDS об новых коммитах, которые попали в сборку
+     * @param string   $workerName
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readProjectConfig($sync, $callback)
+    public function readProjectConfig($workerName, $sync, $callback)
     {
-        $this->readMessage(Message\ProjectConfig::type(), $callback, $sync);
+        $this->readMessage(Message\ProjectConfig::type($workerName), $callback, $sync);
     }
 
     /**

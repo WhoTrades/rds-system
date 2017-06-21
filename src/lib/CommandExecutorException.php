@@ -1,7 +1,7 @@
 <?php
 namespace RdsSystem\lib;
 
-class CommandExecutorException extends \ApplicationException
+class CommandExecutorException extends \Exception
 {
     public $output;
     private $command;
