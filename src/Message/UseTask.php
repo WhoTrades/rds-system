@@ -1,7 +1,7 @@
 <?php
 namespace RdsSystem\Message;
 
-class UseTask extends Base
+class UseTask extends AbstractMultiServerTask
 {
     public $project;
     public $releaseRequestId;
@@ -15,14 +15,15 @@ class UseTask extends Base
      * @param int $releaseRequestId comon4.rds.release_request.obj_id
      * @param string $version - например 67.00.12.1289
      * @param string $initiatorUserName - имя того, кто нажал use
+     * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($project, $releaseRequestId, $version, $initiatorUserName)
+    public function __construct($project, $releaseRequestId, $version, $initiatorUserName, array $projectServers)
     {
         $this->project = $project;
         $this->releaseRequestId = $releaseRequestId;
         $this->version = $version;
         $this->initiatorUserName = $initiatorUserName;
 
-        parent::__construct();
+        parent::__construct($projectServers);
     }
 }

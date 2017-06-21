@@ -6,7 +6,7 @@
  */
 namespace RdsSystem\Message;
 
-class ProjectConfig extends Base
+class ProjectConfig extends AbstractMultiServerTask
 {
     public $project;
     public $configs = [];
@@ -22,13 +22,14 @@ class ProjectConfig extends Base
      *    'config3.local.php' => '<?php ...',
      * )
      * @param string $scriptUploadConfigLocal - sh скрипт по заливке конфигурации на сервера
+     * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($project, array $configs, $scriptUploadConfigLocal)
+    public function __construct($project, array $configs, $scriptUploadConfigLocal, array $projectServers)
     {
         $this->project  = $project;
         $this->configs   = $configs;
         $this->scriptUploadConfigLocal   = $scriptUploadConfigLocal;
 
-        parent::__construct();
+        parent::__construct($projectServers);
     }
 }
