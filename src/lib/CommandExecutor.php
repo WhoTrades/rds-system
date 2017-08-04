@@ -1,20 +1,10 @@
 <?php
 namespace RdsSystem\lib;
 
+use Yii;
+
 class CommandExecutor
 {
-    /** @var \ServiceBase_IDebugLogger */
-    private $debugLogger;
-
-    /**
-     * CommandExecutor constructor.
-     * @param \ServiceBase_IDebugLogger $debugLogger
-     */
-    public function __construct(\ServiceBase_IDebugLogger $debugLogger)
-    {
-        $this->debugLogger = $debugLogger;
-    }
-
     /**
      * @param string $command
      * @param string[]|null $env - assiciated list of env vars for command
@@ -33,8 +23,7 @@ class CommandExecutor
             $commandWithEnv = $command;
         }
 
-
-        $this->debugLogger->message("Executing `$commandWithEnv`");
+        Yii::info("Executing `$commandWithEnv`");
         exec($commandWithEnv, $output, $returnVar);
         $text = implode("\n", $output);
 

@@ -10,6 +10,7 @@ use RdsSystem\Message;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
+use Yii;
 
 final class MessagingRdsMs
 {
@@ -25,9 +26,6 @@ final class MessagingRdsMs
     const TYPE_BUILD_FROM_RDS = 'rds_build_from_rds';
     const TYPE_BUILD_FROM_MS = 'rds_build_from_ms';
 
-    /** @var \ServiceBase_IDebugLogger */
-    private $debugLogger;
-
     private $env;
 
     private $stopped = false;
@@ -39,14 +37,11 @@ final class MessagingRdsMs
     private $channels;
 
     /**
-     * @param \ServiceBase_IDebugLogger $debugLogger
-     * @param string                    $env
+     * MessagingRdsMs constructor
      */
-    public function __construct(\ServiceBase_IDebugLogger $debugLogger, $env = null)
+    public function __construct()
     {
-        $env = $env ?: self::ENV_MAIN;
-        $this->debugLogger = $debugLogger;
-        $this->env = $env;
+        $this->env = self::ENV_MAIN;
 
         $this->connection = new AMQPConnection(self::HOST, self::PORT, self::USER, self::PASS, self::VHOST);
     }
@@ -65,9 +60,21 @@ final class MessagingRdsMs
      */
     public function reconnect()
     {
-        $this->debugLogger->error("reconnecting to rabbitmq-server...");
+        Yii::error("reconnecting to rabbitmq-server...");
         $this->connection->reconnect();
-        $this->debugLogger->error("reconnecting done");
+        Yii::error("reconnecting done");
+    }
+
+    /**
+     * Закрываем соединение
+     */
+    public function disconnect()
+    {
+        $this->stopReceivingMessages();
+        foreach ($this->channels as $channel) {
+            $channel->close();
+        }
+        $this->connection->safeClose();
     }
 
     /**
@@ -422,19 +429,19 @@ final class MessagingRdsMs
         $channel = $this->readMessage(
             Message\ReleaseRequestCurrentStatusReply::type(),
             function (Message\ReleaseRequestCurrentStatusReply $message) use (&$result, &$resultFetched, $request) {
-                $this->debugLogger->message("Received " . json_encode($message));
+                Yii::info("Received " . json_encode($message));
                 if ($message->uniqueTag != $request->getUniqueTag()) {
-                    $this->debugLogger->info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
+                    Yii::info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
 
                     if (microtime(true) - $message->timeCreated > 5) {
-                        $this->debugLogger->error("Dropping too old message " . json_encode($message));
+                        Yii::error("Dropping too old message " . json_encode($message));
                         $message->accepted();
                     }
 
                     return;
                 }
                 $message->accepted();
-                $this->debugLogger->info("Got our packet $message->uniqueTag != {$request->getUniqueTag()}");
+                Yii::info("Got our packet $message->uniqueTag != {$request->getUniqueTag()}");
 
                 $resultFetched = true;
                 $result = $message;
@@ -922,7 +929,7 @@ final class MessagingRdsMs
         $rabbitMessage = new AMQPMessage(serialize($message));
         $channel = $this->createNewChannel($messageType);
 
-        $this->debugLogger->message("Sending to $messageType");
+        Yii::info("Sending to $messageType");
         $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
 
         return $channel;
@@ -961,13 +968,13 @@ final class MessagingRdsMs
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
 
         $channel = $this->createNewChannel($messageType);
-        $this->debugLogger->message("Listening $queueName [$exchangeName]");
+        Yii::info("Listening $queueName [$exchangeName]");
 
         $channel->basic_consume($queueName, $exchangeName, false, false, false, false, function ($message) use ($callback, $channel) {
             $reply = unserialize($message->body);
             $reply->deliveryTag = $message->delivery_info['delivery_tag'];
             $reply->channel = $channel;
-            $this->debugLogger->message("[x] Message received {$reply->deliveryTag}");
+            Yii::info("[x] Message received {$reply->deliveryTag}");
 
             $callback($reply);
         });
@@ -995,19 +1002,19 @@ final class MessagingRdsMs
         $result = [];
 
         $channel = $this->readMessage($replyType, function (Message\RpcReply $message) use (&$result, &$resultFetched, $request, $timeout) {
-            $this->debugLogger->message("Received " . json_encode($message));
+            Yii::info("Received " . json_encode($message));
             if ($message->uniqueTag != $request->getUniqueTag()) {
-                $this->debugLogger->info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
+                Yii::info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
 
                 if (microtime(true) - $message->timeCreated > $timeout) {
-                    $this->debugLogger->error("Dropping too old message " . json_encode($message));
+                    Yii::error("Dropping too old message " . json_encode($message));
                     $message->accepted();
                 }
 
                 return;
             }
             $message->accepted();
-            $this->debugLogger->info("Got our packet $message->uniqueTag == {$request->getUniqueTag()}");
+            Yii::info("Got our packet $message->uniqueTag == {$request->getUniqueTag()}");
 
             $resultFetched = true;
             $result = $message;
@@ -1036,7 +1043,7 @@ final class MessagingRdsMs
     {
         foreach ($this->channels as $channel) {
             foreach ($channel->callbacks as $tag => $callback) {
-                $this->debugLogger->message("Cancelling $tag");
+                Yii::info("Cancelling $tag");
                 $channel->basic_cancel($tag);
             }
         }

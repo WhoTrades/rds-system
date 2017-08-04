@@ -7,6 +7,9 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
 {
     const CHECK_STILL_CAN_RNU_INTERVAL = 5;
 
+    /**
+     * @return array
+     */
     public static function getCommandLineSpec()
     {
         return array(
@@ -20,7 +23,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
                 'default' => \RdsSystem\Model\Rabbit\MessagingRdsMs::ENV_MAIN,
                 'valueRequired' => true,
                 'useForBaseName' => true,
-            ]
+            ],
         );
     }
 
@@ -30,7 +33,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
             try {
                 $model->waitForMessages(null, null, $cronJob->getOption('max-duration'));
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
-                return 0;
+                return;
             }
         }
     }
@@ -44,8 +47,7 @@ abstract class RabbitDaemon extends \Cronjob\Tool\ToolBase
             return $model;
         }
 
-        $rdsSystem = new \RdsSystem\Factory($this->debugLogger);
-        $this->debugLogger->message("Using env=" . $cronJob->getOption('env'));
+        $rdsSystem = new \RdsSystem\Factory();
         $model  = $rdsSystem->getMessagingRdsMsModel($cronJob->getOption('env'));
 
         return $model;
