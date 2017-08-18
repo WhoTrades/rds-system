@@ -1,11 +1,13 @@
 <?php
-/***
+/**
  * Оповещение о том, что фичевые ветки были удалены
  */
 namespace RdsSystem\Message\Merge;
 
 class DroppedBranches extends \RdsSystem\Message\Base
 {
+    public $branch;
+    public $skippedRepositories;
     /**
      * @param string $branch
      * @param array $skippedRepositories

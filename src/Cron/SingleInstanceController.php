@@ -9,8 +9,14 @@ abstract class SingleInstanceController extends Controller
 {
     const CODE_DUPLICATE_INSTANCE = 13;
 
+    /**
+     * @var string сборка, в которой процесс работает
+     */
     public $sys__package;
 
+    /**
+     * @var string уникальный идентификатор процесса
+     */
     public $sys__key;
 
     /**
