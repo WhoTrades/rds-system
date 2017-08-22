@@ -277,25 +277,6 @@ final class MessagingRdsMs
     }
 
     /**
-     * Сообщает RDS какая версия проекта была на самом деле выложена перед нажатием USE (полезно, в случае когда USE выполнят мимо RDS)
-     * @param Message\ReleaseRequestOldVersion $message
-     */
-    public function sendOldVersion(Message\ReleaseRequestOldVersion $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Вычитывает старую выложенную версию для проекта
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readOldVersion($sync, $callback)
-    {
-        $this->readMessage(Message\ReleaseRequestOldVersion::type(), $callback, $sync);
-    }
-
-    /**
      * Сообщает RDS какая версия проекта была выложена
      * @param Message\ReleaseRequestUsedVersion $message
      */

@@ -37,7 +37,7 @@ abstract class CommandController extends SingleInstanceController
 
         $list = $this->getCommands();
 
-        $this->stdout(implode("\n", $list));
+        $this->stdout(implode("\n", $list) . "\n");
     }
 
     abstract protected function getCommands();
