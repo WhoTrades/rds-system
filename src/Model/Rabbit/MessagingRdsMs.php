@@ -295,6 +295,27 @@ final class MessagingRdsMs
     }
 
     /**
+     * Отправка задачи к сборщику на удаление собранного пакета
+     * @param string $receiverName
+     * @param Message\DropReleaseRequest $message
+     * @return AMQPChannel
+     */
+    public function sendDropReleaseRequest($receiverName, Message\DropReleaseRequest $message)
+    {
+        return $this->writeMessage($message, $receiverName);
+    }
+
+    /**
+     * @param string $receiverName
+     * @param bool $sync
+     * @param callable $callback
+     */
+    public function readDropReleaseRequest($receiverName, $sync, $callback)
+    {
+        $this->readMessage(Message\DropReleaseRequest::type($receiverName), $callback, $sync);
+    }
+
+    /**
      * Удаляет сборку из RDS, используется сборщиком мусора
      * @param Message\RemoveReleaseRequest $message
      * @return AMQPChannel
@@ -536,28 +557,9 @@ final class MessagingRdsMs
      * @param bool     $sync
      * @param callable $callback
      */
-    public function readGetProjectBuildsToDeleteRequest($sync, $callback)
-    {
-        $this->readMessage(Message\ProjectBuildsToDeleteRequest::type(), $callback, $sync);
-    }
-
-    /**
-     * Считывает все сборки, которые есть на ms машине для проверки какие из них можно удалять
-     * @param bool     $sync
-     * @param callable $callback
-     */
     public function readRemoveReleaseRequest($sync, $callback)
     {
         $this->readMessage(Message\RemoveReleaseRequest::type(), $callback, $sync);
-    }
-
-    /**
-     * Отправляет все сборки, которые есть на ms машине для проверки какие из них можно удалять
-     * @param Message\ProjectBuildsToDeleteRequest $message
-     */
-    public function sendGetProjectBuildsToDeleteRequest(Message\ProjectBuildsToDeleteRequest $message)
-    {
-        $this->writeMessage($message);
     }
 
     /**
@@ -568,15 +570,6 @@ final class MessagingRdsMs
     public function readGetProjectBuildsToDeleteReply($sync, $callback)
     {
         $this->readMessage(Message\ProjectBuildsToDeleteReply::type(), $callback, $sync);
-    }
-
-    /**
-     * Отправляет список сборок, которые можно удалить на основании всего списка сборок, которые есть на ms машине
-     * @param Message\ProjectBuildsToDeleteReply $message
-     */
-    public function sendGetProjectBuildsToDeleteRequestReply(Message\ProjectBuildsToDeleteReply $message)
-    {
-        $this->writeMessage($message);
     }
 
     /**

@@ -1,22 +1,24 @@
 <?php
 namespace RdsSystem\Message;
 
-class ProjectBuildsToDeleteReply extends AbstractMultiServerTask
+class DropReleaseRequest extends AbstractMultiServerTask
 {
     public $project;
     public $version;
+    public $scriptRemove;
 
     /**
-     * ProjectBuildsToDeleteReply constructor.
-     *
+     * BuildTask constructor.
      * @param string $project
      * @param string $version
+     * @param string $scriptRemove
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($project, $version, array $projectServers)
+    public function __construct($project, $version, $scriptRemove, array $projectServers)
     {
         $this->project = $project;
         $this->version = $version;
+        $this->scriptRemove = $scriptRemove;
 
         parent::__construct($projectServers);
     }
