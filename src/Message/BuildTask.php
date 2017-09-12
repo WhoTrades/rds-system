@@ -9,6 +9,8 @@ class BuildTask extends AbstractMultiServerTask
     public $release;
     public $lastBuildTag;
     public $scriptMigrationNew;
+    public $scriptDeploy;
+    public $scriptCron;
 
     /**
      * BuildTask constructor.
@@ -18,9 +20,11 @@ class BuildTask extends AbstractMultiServerTask
      * @param string $release
      * @param string $lastBuildTag
      * @param string $scriptMigrationNew
+     * @param string $scriptDeploy
+     * @param string $scriptCron
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew, array $projectServers)
+    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew, $scriptDeploy, $scriptCron, array $projectServers)
     {
         $this->id = $id;
         $this->project = $project;
@@ -28,6 +32,8 @@ class BuildTask extends AbstractMultiServerTask
         $this->release = $release;
         $this->lastBuildTag = $lastBuildTag;
         $this->scriptMigrationNew = $scriptMigrationNew;
+        $this->scriptDeploy = $scriptDeploy;
+        $this->scriptCron = $scriptCron;
 
         parent::__construct($projectServers);
     }
