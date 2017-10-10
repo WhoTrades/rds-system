@@ -1,5 +1,5 @@
 <?php
-namespace RdsSystem\Message;
+namespace whotrades\RdsSystem\Message;
 
 class ReleaseRequestsReply extends Base
 {

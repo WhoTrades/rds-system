@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Tool;
+namespace whotrades\RdsSystem\Message\Tool;
 
-class GetInfoResult extends \RdsSystem\Message\RpcReply
+class GetInfoResult extends \whotrades\RdsSystem\Message\RpcReply
 {
     public $result;
     public $server;

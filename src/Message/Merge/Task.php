@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Merge;
+namespace whotrades\RdsSystem\Message\Merge;
 
-class Task extends \RdsSystem\Message\Base
+class Task extends \whotrades\RdsSystem\Message\Base
 {
     const MERGE_TYPE_FEATURE    = 'feature';
     const MERGE_TYPE_BUILD      = 'build';

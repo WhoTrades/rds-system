@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Merge;
+namespace whotrades\RdsSystem\Message\Merge;
 
-class TaskResult extends \RdsSystem\Message\Base
+class TaskResult extends \whotrades\RdsSystem\Message\Base
 {
     public $featureId;
     public $status;

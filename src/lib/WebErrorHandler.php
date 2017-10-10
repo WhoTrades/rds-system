@@ -1,5 +1,5 @@
 <?php
-namespace RdsSystem\lib;
+namespace whotrades\RdsSystem\lib;
 
 use Yii;
 

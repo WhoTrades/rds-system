@@ -2,9 +2,9 @@
 /***
  * Задача на удаление фичевой ветки
  */
-namespace RdsSystem\Message\Merge;
+namespace whotrades\RdsSystem\Message\Merge;
 
-class DropBranches extends \RdsSystem\Message\Base
+class DropBranches extends \whotrades\RdsSystem\Message\Base
 {
     public $branch;
 

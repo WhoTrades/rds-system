@@ -1,0 +1,8 @@
+{
+  "name": "whotrades/rds-system",
+  "autoload": {
+    "psr-4": {
+      "whotrades\\RdsSystem\\": "src/RdsSystem/"
+    }
+  }
+}

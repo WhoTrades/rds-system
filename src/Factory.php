@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem;
+namespace whotrades\RdsSystem;
 
-use \RdsSystem\Model\Rabbit\MessagingRdsMs;
+use \whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 
 final class Factory
 {

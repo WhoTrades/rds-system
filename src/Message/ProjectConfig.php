@@ -4,7 +4,7 @@
  *
  * Сообщение-задача на обновление локальных конфигов у проекта. Сообщение генерируется RDS и обрабатывается сервисом deploy
  */
-namespace RdsSystem\Message;
+namespace whotrades\RdsSystem\Message;
 
 class ProjectConfig extends AbstractMultiServerTask
 {

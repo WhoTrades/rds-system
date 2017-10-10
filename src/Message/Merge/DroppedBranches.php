@@ -2,9 +2,9 @@
 /**
  * Оповещение о том, что фичевые ветки были удалены
  */
-namespace RdsSystem\Message\Merge;
+namespace whotrades\RdsSystem\Message\Merge;
 
-class DroppedBranches extends \RdsSystem\Message\Base
+class DroppedBranches extends \whotrades\RdsSystem\Message\Base
 {
     public $branch;
     public $skippedRepositories;

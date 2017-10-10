@@ -1,8 +1,8 @@
 <?php
 /**
- * @package RdsSystem\Message
+ * @package whotrades\RdsSystem\Message
  */
-namespace RdsSystem\Message;
+namespace whotrades\RdsSystem\Message;
 
 class AbstractMultiServerTask extends Base
 {

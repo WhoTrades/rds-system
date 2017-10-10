@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Tool;
+namespace whotrades\RdsSystem\Message\Tool;
 
-class ToolLogTailResult extends \RdsSystem\Message\RpcReply
+class ToolLogTailResult extends \whotrades\RdsSystem\Message\RpcReply
 {
     public $isSuccess;
     public $result;

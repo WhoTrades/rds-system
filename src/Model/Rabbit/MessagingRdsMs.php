@@ -4,9 +4,9 @@
  *
  * Класс, где перечислены все бизнес методы общения между service-rds и service-deploy
  */
-namespace RdsSystem\Model\Rabbit;
+namespace whotrades\RdsSystem\Model\Rabbit;
 
-use RdsSystem\Message;
+use whotrades\RdsSystem\Message;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;

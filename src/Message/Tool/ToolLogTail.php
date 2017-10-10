@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Tool;
+namespace whotrades\RdsSystem\Message\Tool;
 
-class ToolLogTail extends \RdsSystem\Message\RpcRequest
+class ToolLogTail extends \whotrades\RdsSystem\Message\RpcRequest
 {
     public $tag;
     public $linesCount;

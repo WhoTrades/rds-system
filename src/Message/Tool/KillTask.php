@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Tool;
+namespace whotrades\RdsSystem\Message\Tool;
 
-class KillTask extends \RdsSystem\Message\RpcRequest
+class KillTask extends \whotrades\RdsSystem\Message\RpcRequest
 {
     public $key;
     public $project;

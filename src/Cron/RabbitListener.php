@@ -1,10 +1,10 @@
 <?php
-namespace RdsSystem\Cron;
+namespace whotrades\RdsSystem\Cron;
 
 use Raven_Client;
-use \RdsSystem\Model\Rabbit\MessagingRdsMs;
+use \whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 use Yii;
-use yii\console\Controller;
+use \whotrades\RdsSystem\Factory;
 
 abstract class RabbitListener extends SingleInstanceController
 {
@@ -49,7 +49,7 @@ abstract class RabbitListener extends SingleInstanceController
             return $model;
         }
 
-        $rdsSystem = new \RdsSystem\Factory();
+        $rdsSystem = new Factory();
         $model  = $rdsSystem->getMessagingRdsMsModel(self::ENV);
 
         return $model;

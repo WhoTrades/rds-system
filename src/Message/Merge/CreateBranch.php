@@ -1,7 +1,7 @@
 <?php
-namespace RdsSystem\Message\Merge;
+namespace whotrades\RdsSystem\Message\Merge;
 
-class CreateBranch extends \RdsSystem\Message\Base
+class CreateBranch extends \whotrades\RdsSystem\Message\Base
 {
     public $branch;
     public $source;

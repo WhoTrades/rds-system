@@ -1,5 +1,5 @@
 <?php
-namespace RdsSystem\Cron;
+namespace whotrades\RdsSystem\Cron;
 
 use Yii;
 use yii\console\Controller;

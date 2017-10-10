@@ -3,9 +3,9 @@
  * @author Artem Naumenko
  */
 
-namespace RdsSystem\commands;
+namespace whotrades\RdsSystem\commands;
 
-use RdsSystem\Cron\SingleInstanceController;
+use whotrades\RdsSystem\Cron\SingleInstanceController;
 
 abstract class CommandController extends SingleInstanceController
 {
