@@ -1,5 +1,8 @@
 {
   "name": "whotrades/rds-system",
+  "type": "library",
+  "author": "Artem Naumenko (entsupml@gmail.com)",
+  "description": "Core part of RDS service",
   "autoload": {
     "psr-4": {
       "whotrades\\RdsSystem\\": "src/RdsSystem/"
