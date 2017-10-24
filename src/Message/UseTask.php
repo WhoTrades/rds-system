@@ -7,6 +7,7 @@ class UseTask extends AbstractMultiServerTask
     public $releaseRequestId;
     public $version;
     public $initiatorUserName;
+    public $scriptUse;
 
     /**
      * UseTask constructor.
@@ -15,14 +16,16 @@ class UseTask extends AbstractMultiServerTask
      * @param int $releaseRequestId comon4.rds.release_request.obj_id
      * @param string $version - например 67.00.12.1289
      * @param string $initiatorUserName - имя того, кто нажал use
+     * @param string $scriptUse - скрипт активации сборки
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($project, $releaseRequestId, $version, $initiatorUserName, array $projectServers)
+    public function __construct($project, $releaseRequestId, $version, $initiatorUserName, $scriptUse, array $projectServers)
     {
         $this->project = $project;
         $this->releaseRequestId = $releaseRequestId;
         $this->version = $version;
         $this->initiatorUserName = $initiatorUserName;
+        $this->scriptUse = $scriptUse;
 
         parent::__construct($projectServers);
     }
