@@ -10,5 +10,7 @@ class UnixSignal extends Base
     {
         $this->pid = $pid;
         $this->signal = $signal;
+
+        parent::__construct();
     }
 }

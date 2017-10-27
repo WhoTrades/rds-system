@@ -6,15 +6,16 @@
  */
 namespace whotrades\RdsSystem\Model\Rabbit;
 
+use PhpAmqpLib\Exception\AMQPIOWaitException;
 use whotrades\RdsSystem\Message;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use Yii;
 
-final class MessagingRdsMs
+class MessagingRdsMs
 {
-    const HOST = 'rds-rabbitmq-01.local';
+    const HOST = 'localhost';
     const PORT = 5672;
     const USER = 'rds';
     const PASS = 'rds';
@@ -22,9 +23,6 @@ final class MessagingRdsMs
 
     const EXCHANGE = 'rds_exchange';
     const ENV_MAIN = 'main';
-
-    const TYPE_BUILD_FROM_RDS = 'rds_build_from_rds';
-    const TYPE_BUILD_FROM_MS = 'rds_build_from_ms';
 
     private $env;
 
@@ -41,9 +39,9 @@ final class MessagingRdsMs
      */
     public function __construct()
     {
-        $this->env = self::ENV_MAIN;
+        $this->env = static::ENV_MAIN;
 
-        $this->connection = new AMQPConnection(self::HOST, self::PORT, self::USER, self::PASS, self::VHOST);
+        $this->connection = new AMQPConnection(static::HOST, static::PORT, static::USER, static::PASS, static::VHOST);
     }
 
     /**
@@ -111,7 +109,12 @@ final class MessagingRdsMs
                 foreach ($this->channels as $key => $channel) {
                     try {
                         for ($i = 0; $i < 10; $i++) {
-                            $channel->wait(null, true, 0.01);
+                            try {
+                                $channel->wait(null, true, 0.01);
+                            } catch (AMQPIOWaitException $e) {
+                                $channel->wait(null, true, 0.2);
+                            }
+
                             if ($this->stopped) {
                                 $this->stopped = false;
 
@@ -152,7 +155,6 @@ final class MessagingRdsMs
     /**
      * @param bool         $sync
      * @param callable     $callback
-     * @return Message\TaskStatusChanged
      */
     public function readTaskStatusChanged($sync, $callback)
     {
@@ -391,149 +393,6 @@ final class MessagingRdsMs
     }
 
     /**
-     * Синхронный метод, который возвращает текущий статус запроса на релиз
-     * @param int $releaseRequestId
-     * @param int $timeout
-     *
-     * @throws \Exception
-     *
-     * @return Message\ReleaseRequestCurrentStatusReply
-     */
-    public function getReleaseRequestStatus($releaseRequestId, $timeout = null)
-    {
-        $timeout = $timeout ?: 30;
-        $request = new Message\ReleaseRequestCurrentStatusRequest($releaseRequestId);
-
-        $this->writeMessage($request);
-
-        $resultFetched = false;
-        $result = null;
-
-        $channel = $this->readMessage(
-            Message\ReleaseRequestCurrentStatusReply::type(),
-            function (Message\ReleaseRequestCurrentStatusReply $message) use (&$result, &$resultFetched, $request) {
-                Yii::info("Received " . json_encode($message));
-                if ($message->uniqueTag != $request->getUniqueTag()) {
-                    Yii::info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
-
-                    if (microtime(true) - $message->timeCreated > 5) {
-                        Yii::error("Dropping too old message " . json_encode($message));
-                        $message->accepted();
-                    }
-
-                    return;
-                }
-                $message->accepted();
-                Yii::info("Got our packet $message->uniqueTag != {$request->getUniqueTag()}");
-
-                $resultFetched = true;
-                $result = $message;
-
-            },
-            false
-        );
-
-        for (;;) {
-            try {
-                $channel->wait(null, true, $timeout);
-            } catch (\Exception $e) {
-                $channel->basic_cancel($this->getExchangeName(Message\ReleaseRequestCurrentStatusReply::type()));
-                throw $e;
-            }
-
-            if ($resultFetched) {
-                $channel->basic_cancel($this->getExchangeName(Message\ReleaseRequestCurrentStatusReply::type()));
-
-                return $result;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Запрашивает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable"
-     * @param Message\ReleaseRequestCurrentStatusRequest $message
-     */
-    public function sendCurrentStatusRequest(Message\ReleaseRequestCurrentStatusRequest $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Запрашивает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable"
-     * @param bool     $sync
-     * @param callable $callback
-     *
-     * @return AMQPChannel
-     */
-    public function readCurrentStatusRequest($sync, $callback)
-    {
-        return $this->readMessage(Message\ReleaseRequestCurrentStatusRequest::type(), $callback, $sync);
-    }
-
-    /**
-     * Возвращает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable"
-     * @param Message\ReleaseRequestCurrentStatusReply $message
-     */
-    public function sendCurrentStatusReply(Message\ReleaseRequestCurrentStatusReply $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Возвращает текущий статус сборки. Используется что бы понять была ли нажата ссылка "make stable"
-     * @param callable $callback
-     */
-    public function readCurrentStatusReplyOnce($callback)
-    {
-        $messageType = Message\ReleaseRequestCurrentStatusReply::type();
-        $channel = $this->readMessage($messageType, $callback, false);
-        $this->waitForMessages($channel, 100);
-
-        list($exchangeName, ) = $this->declareAndGetQueueAndExchange($messageType);
-        $channel->basic_cancel($exchangeName);
-    }
-
-    /**
-     * Запрашивает список всех проектов, используется сборщиком мусора
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readGetProjectsRequest($sync, $callback)
-    {
-        $this->readMessage(Message\ProjectsRequest::type(), $callback, $sync);
-    }
-
-    /**
-     * Запрашивает список всех проектов, используется сборщиком мусора
-     * @param Message\ProjectsRequest $message
-     */
-    public function sendGetProjectsRequest(Message\ProjectsRequest $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Возвращает список всех проектов, используется сборщиком мусора
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readGetProjectsReply($sync, $callback)
-    {
-        $this->readMessage(Message\ProjectsReply::type(), $callback, $sync);
-    }
-
-    /**
-     * Запрашивает список всех проектов, используется сборщиком мусора
-     * @param Message\ProjectsReply $message
-     */
-    public function sendGetProjectsReply(Message\ProjectsReply $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
      * Считывает все сборки, которые есть на ms машине для проверки какие из них можно удалять
      * @param bool     $sync
      * @param callable $callback
@@ -541,94 +400,6 @@ final class MessagingRdsMs
     public function readRemoveReleaseRequest($sync, $callback)
     {
         $this->readMessage(Message\RemoveReleaseRequest::type(), $callback, $sync);
-    }
-
-    /**
-     * Читает список сборок, которые можно удалить на основании всего списка сборок, которые есть на ms машине
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readGetProjectBuildsToDeleteReply($sync, $callback)
-    {
-        $this->readMessage(Message\ProjectBuildsToDeleteReply::type(), $callback, $sync);
-    }
-
-    /**
-     * Отправляет прогресс выполнения миграции
-     * @param Message\HardMigrationProgress $message
-     */
-    public function sendHardMigrationProgress(Message\HardMigrationProgress $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Вычитывает изменение прогресса выполнения тяжелых миграций
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readHardMigrationProgress($sync, $callback)
-    {
-        $this->readMessage(Message\HardMigrationProgress::type(), $callback, $sync);
-    }
-
-    /**
-     * Вычитывает изменение статуса выполнения тяжелых миграций
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readHardMigrationStatus($sync, $callback)
-    {
-        $this->readMessage(Message\HardMigrationStatus::type(), $callback, $sync);
-    }
-
-    /**
-     * Вычитывает новый кусок лога выполнения миграции
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readHardMigrationLogChunk($sync, $callback)
-    {
-        $this->readMessage(Message\HardMigrationLogChunk::type(), $callback, $sync);
-    }
-
-    /**
-     * Отправляет задачу на выполнение тяжелой миграции
-     * @param string   $receiverName
-     * @param Message\HardMigrationTask $message
-     */
-    public function sendHardMigrationTask($receiverName, Message\HardMigrationTask $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
-
-    /**
-     * Вычитывает задачи по накатыванию тяжелых миграций
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function getHardMigrationTask($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\HardMigrationTask::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * Отправляет изменение статуса тяжелой миграции
-     * @param Message\HardMigrationStatus $message
-     */
-    public function sendHardMigrationStatus(Message\HardMigrationStatus $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * Отправляет очередной кусок лога выполнения миграции
-     * @param Message\HardMigrationLogChunk $message
-     */
-    public function sendHardMigrationLogChunk(Message\HardMigrationLogChunk $message)
-    {
-        $this->writeMessage($message);
     }
 
     /**
@@ -668,200 +439,7 @@ final class MessagingRdsMs
         $this->readMessage(Message\UnixSignalToGroup::type($receiverName), $callback, $sync);
     }
 
-    /**
-     * @param string             $receiverName
-     * @param Message\Merge\Task $message
-     */
-    public function sendMergeTask($receiverName, Message\Merge\Task $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
 
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readMergeTask($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Merge\Task::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * @param string                     $receiverName
-     * @param Message\Merge\CreateBranch $message
-     */
-    public function sendMergeCreateBranch($receiverName, Message\Merge\CreateBranch $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
-
-    /**
-     * @param string                   $receiverName
-     * @param Message\Merge\TaskResult $message
-     */
-    public function sendMergeTaskResult($receiverName, Message\Merge\TaskResult $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readMergeTaskResult($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Merge\TaskResult::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readMergeCreateBranch($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Merge\CreateBranch::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * @param string                     $receiverName
-     * @param Message\Merge\DropBranches $message
-     */
-    public function sendDropBranches($receiverName, Message\Merge\DropBranches $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readDropBranches($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Merge\DropBranches::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * @param Message\Merge\DroppedBranches $message
-     */
-    public function sendDroppedBranches(Message\Merge\DroppedBranches $message)
-    {
-        $this->writeMessage($message);
-    }
-
-    /**
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readDroppedBranches($sync, $callback)
-    {
-        $this->readMessage(Message\Merge\DroppedBranches::type(), $callback, $sync);
-    }
-
-    // Tool maintenance
-
-    /**
-     * Синхронный метод, который убивает процессы и возвращает список убитых
-     * @param string                $receiverName
-     * @param Message\Tool\KillTask $task
-     * @param string                $resultType
-     * @param int                   $timeout
-     *
-     * @throws \Exception
-     *
-     * @return Message\Tool\KillResult
-     */
-    public function sendToolKillTask($receiverName, Message\Tool\KillTask $task, $resultType, $timeout = null)
-    {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
-    }
-
-    /**
-     * @param Message\Tool\KillResult $result
-     */
-    public function sendToolKillResult(Message\Tool\KillResult $result)
-    {
-        $this->writeMessage($result);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readToolKillTaskRequest($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Tool\KillTask::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * Синхронный метод, который возвращает информацию о работающих процессах
-     * @param string                   $receiverName
-     * @param Message\Tool\GetInfoTask $task
-     * @param string                   $resultType
-     * @param int                      $timeout
-     *
-     * @return Message\Tool\GetInfoResult
-     * @throws \Exception
-     */
-    public function sendToolGetInfoTask($receiverName, Message\Tool\GetInfoTask $task, $resultType, $timeout = null)
-    {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
-    }
-
-    /**
-     * Синхронный метод, который возвращает последие $linesCount строк лога работы тула
-     * @param string                   $receiverName
-     * @param Message\Tool\ToolLogTail $task
-     * @param string                   $resultType
-     * @param int                      $timeout
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function sendToolGetToolLogTail($receiverName, Message\Tool\ToolLogTail $task, $resultType, $timeout = null)
-    {
-        return $this->jsonRpcCall($task, $resultType, $timeout ?: 30, $receiverName);
-    }
-
-    /**
-     * @param Message\Tool\GetInfoResult $result
-     */
-    public function sendToolGetInfoResult(Message\Tool\GetInfoResult $result)
-    {
-        $this->writeMessage($result);
-    }
-
-    /**
-     * @param Message\Tool\ToolLogTailResult $result
-     */
-    public function sendToolGetToolLogTailResult(Message\Tool\ToolLogTailResult $result)
-    {
-        $this->writeMessage($result);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readToolGetInfoTaskRequest($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Tool\GetInfoTask::type($receiverName), $callback, $sync);
-    }
-
-    /**
-     * @param string   $receiverName
-     * @param bool     $sync
-     * @param callable $callback
-     */
-    public function readToolGetToolLogTail($receiverName, $sync, $callback)
-    {
-        $this->readMessage(Message\Tool\ToolLogTail::type($receiverName), $callback, $sync);
-    }
 
     private function declareAndGetQueueAndExchange($messageType)
     {
@@ -876,7 +454,7 @@ final class MessagingRdsMs
      *
      * @return AMQPChannel
      */
-    private function writeMessage(Message\Base $message, $receiverName = null)
+    protected function writeMessage(Message\Base $message, $receiverName = null)
     {
         $receiverName = is_null($receiverName) ? '*' : $receiverName;
         $messageType = $message->type($receiverName);
@@ -909,12 +487,12 @@ final class MessagingRdsMs
         return $this->channels[$messageType] = $channel;
     }
 
-    private function getExchangeName($messageType)
+    protected function getExchangeName($messageType)
     {
         return $this->env . ":" . $messageType . ":";
     }
 
-    private function readMessage($messageType, $callback, $sync = null)
+    protected function readMessage($messageType, $callback, $sync = null)
     {
         if ($sync === null) {
             $sync = true;
@@ -941,58 +519,7 @@ final class MessagingRdsMs
         return $channel;
     }
 
-    /**
-     * @param Message\RpcRequest $request
-     * @param                    $replyType
-     * @param int                $timeout
-     *
-     * @return array
-     * @throws \Exception
-     */
-    private function jsonRpcCall(Message\RpcRequest $request, $replyType, $timeout = null, $receiverName = '*')
-    {
-        $timeout = $timeout ?: 30;
-        $this->writeMessage($request, $receiverName);
 
-        $result = [];
-
-        $channel = $this->readMessage($replyType, function (Message\RpcReply $message) use (&$result, &$resultFetched, $request, $timeout) {
-            Yii::info("Received " . json_encode($message));
-            if ($message->uniqueTag != $request->getUniqueTag()) {
-                Yii::info("Skip not our packet $message->uniqueTag != {$request->getUniqueTag()}");
-
-                if (microtime(true) - $message->timeCreated > $timeout) {
-                    Yii::error("Dropping too old message " . json_encode($message));
-                    $message->accepted();
-                }
-
-                return;
-            }
-            $message->accepted();
-            Yii::info("Got our packet $message->uniqueTag == {$request->getUniqueTag()}");
-
-            $resultFetched = true;
-            $result = $message;
-
-        }, false);
-
-        for (;;) {
-            try {
-                $channel->wait(null, true, $timeout);
-            } catch (\Exception $e) {
-                $channel->basic_cancel($this->getExchangeName($replyType));
-                throw $e;
-            }
-
-            if ($resultFetched) {
-                $channel->basic_cancel($this->getExchangeName($replyType));
-
-                return $result;
-            }
-        }
-
-        return null;
-    }
 
     private function cancelAll()
     {

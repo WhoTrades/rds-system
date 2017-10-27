@@ -10,5 +10,7 @@ class RemoveReleaseRequest extends Base
     {
         $this->projectName = $projectName;
         $this->version = $version;
+
+        parent::__construct();
     }
 }

@@ -8,5 +8,7 @@ class UnixSignalToGroup extends Base
     public function __construct($pgid)
     {
         $this->pgid = $pgid;
+
+        parent::__construct();
     }
 }

@@ -10,5 +10,7 @@ class ReleaseRequestCronConfig extends Base
     {
         $this->taskId = $taskId;
         $this->text = $text;
+
+        parent::__construct();
     }
 }

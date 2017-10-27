@@ -16,5 +16,7 @@ class ReleaseRequestMigrationStatus extends Base
         $this->type = $type;
         $this->status = $status;
         $this->errorText = $errorText;
+
+        parent::__construct();
     }
 }

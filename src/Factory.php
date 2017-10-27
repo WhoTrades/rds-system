@@ -3,22 +3,25 @@ namespace whotrades\RdsSystem;
 
 use \whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 
-final class Factory
+class Factory
 {
-    /** @var */
+    /** @var MessagingRdsMs */
     private $messagingRdsMsModel;
 
     /**
-     * @param string $env
      * @return MessagingRdsMs
      */
-    public function getMessagingRdsMsModel($env = null)
+    public function getMessagingRdsMsModel()
     {
-        $env = $env ?? MessagingRdsMs::ENV_MAIN;
-        if (empty($this->messagingRdsMsModel[$env])) {
-            $this->messagingRdsMsModel[$env] = new MessagingRdsMs($env);
+        if (empty($this->messagingRdsMsModel)) {
+            $this->messagingRdsMsModel = $this->getMessagingModel();
         }
 
-        return $this->messagingRdsMsModel[$env];
+        return $this->messagingRdsMsModel;
+    }
+
+    protected function getMessagingModel()
+    {
+        return new MessagingRdsMs();
     }
 }

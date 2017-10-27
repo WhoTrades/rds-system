@@ -14,5 +14,7 @@ class TaskStatusChanged extends Base
         $this->status = $status;
         $this->version = $version;
         $this->attach = $attach;
+
+        parent::__construct();
     }
 }

@@ -8,5 +8,7 @@ class ReleaseRequestsRequest extends Base
     public function __construct($project)
     {
         $this->project = $project;
+
+        parent::__construct();
     }
 }

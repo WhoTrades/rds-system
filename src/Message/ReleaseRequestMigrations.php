@@ -14,5 +14,7 @@ class ReleaseRequestMigrations extends Base
         $this->version = $version;
         $this->migrations = $migrations;
         $this->type = $type;
+
+        parent::__construct();
     }
 }

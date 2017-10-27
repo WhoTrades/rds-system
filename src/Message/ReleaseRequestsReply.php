@@ -8,5 +8,7 @@ class ReleaseRequestsReply extends Base
     public function __construct($releaseRequests)
     {
         $this->releaseRequests = $releaseRequests;
+
+        parent::__construct();
     }
 }

@@ -10,5 +10,7 @@ class KillTask extends Base
     {
         $this->project = $project;
         $this->taskId = $taskId;
+
+        parent::__construct();
     }
 }

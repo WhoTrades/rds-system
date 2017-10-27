@@ -2,9 +2,10 @@
 namespace whotrades\RdsSystem\Cron;
 
 use Raven_Client;
-use \whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
+use whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 use Yii;
-use \whotrades\RdsSystem\Factory;
+use RdsSystem\Factory;
+use yii\base\ExitException;
 
 abstract class RabbitListener extends SingleInstanceController
 {
@@ -50,7 +51,7 @@ abstract class RabbitListener extends SingleInstanceController
         }
 
         $rdsSystem = new Factory();
-        $model  = $rdsSystem->getMessagingRdsMsModel(self::ENV);
+        $model  = $rdsSystem->getMessagingRdsMsModel();
 
         return $model;
     }
@@ -65,5 +66,7 @@ abstract class RabbitListener extends SingleInstanceController
         $sentry = Yii::$app->sentry;
         $sentry->captureMessage("tool terminated by SIGTERM", ['signo' => $signo], Raven_Client::FATAL, true);
         Yii::error("tool terminated without termination behavior");
+
+        throw new ExitException();
     }
 }
