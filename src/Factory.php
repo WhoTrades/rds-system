@@ -2,6 +2,7 @@
 namespace whotrades\RdsSystem;
 
 use \whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
+use Yii;
 
 class Factory
 {
@@ -22,6 +23,8 @@ class Factory
 
     protected function getMessagingModel()
     {
-        return new MessagingRdsMs();
+        $config = Yii::$app->params['messaging'];
+
+        return new MessagingRdsMs($config['host'], $config['port'], $config['user'], $config['pass'], $config['vhost']);
     }
 }

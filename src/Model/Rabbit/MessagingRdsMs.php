@@ -15,12 +15,6 @@ use Yii;
 
 class MessagingRdsMs
 {
-    const HOST = 'localhost';
-    const PORT = 5672;
-    const USER = 'rds';
-    const PASS = 'rds';
-    const VHOST = '/';
-
     const EXCHANGE = 'rds_exchange';
     const ENV_MAIN = 'main';
 
@@ -37,11 +31,11 @@ class MessagingRdsMs
     /**
      * MessagingRdsMs constructor
      */
-    public function __construct()
+    public function __construct($host, $port, $user, $pass, $vhost)
     {
         $this->env = static::ENV_MAIN;
 
-        $this->connection = new AMQPConnection(static::HOST, static::PORT, static::USER, static::PASS, static::VHOST);
+        $this->connection = new AMQPConnection($host, $port, $user, $pass, $vhost);
     }
 
     /**
