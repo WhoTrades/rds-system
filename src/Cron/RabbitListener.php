@@ -4,7 +4,7 @@ namespace whotrades\RdsSystem\Cron;
 use Raven_Client;
 use whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 use Yii;
-use RdsSystem\Factory;
+use whotrades\RdsSystem\Factory;
 use yii\base\ExitException;
 
 abstract class RabbitListener extends SingleInstanceController
