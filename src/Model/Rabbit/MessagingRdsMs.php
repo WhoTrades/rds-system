@@ -17,6 +17,8 @@ class MessagingRdsMs
 {
     const EXCHANGE = 'rds_exchange';
     const ENV_MAIN = 'main';
+    const MESSAGE_READ_TIMEOUT_MIN = 10*3600;
+    const MESSAGE_READ_TIMEOUT_MAX = 20*3600;
 
     private $env;
 
@@ -507,7 +509,7 @@ class MessagingRdsMs
         });
 
         if ($sync) {
-            $this->waitForMessages($channel);
+            $this->waitForMessages($channel, null, rand(self::MESSAGE_READ_TIMEOUT_MIN, self::MESSAGE_READ_TIMEOUT_MAX));
         }
 
         return $channel;
