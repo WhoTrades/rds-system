@@ -509,7 +509,11 @@ class MessagingRdsMs
         });
 
         if ($sync) {
-            $this->waitForMessages($channel, null, rand(self::MESSAGE_READ_TIMEOUT_MIN, self::MESSAGE_READ_TIMEOUT_MAX));
+            try {
+                $this->waitForMessages($channel, null, $timeOut = rand(self::MESSAGE_READ_TIMEOUT_MIN, self::MESSAGE_READ_TIMEOUT_MAX));
+            } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
+                Yii::info("[x] Reached timeout {$timeOut}");
+            }
         }
 
         return $channel;
