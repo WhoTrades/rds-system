@@ -1,21 +1,26 @@
 <?php
+
 namespace whotrades\RdsSystem\Message;
 
-class ReleaseRequestMigrationStatus extends Base
+class MigrationStatus extends Base
 {
+    const STATUS_UP = 'up';
+    const STATUS_FAILED = 'failed';
+
     public $project;
     public $version;
     public $type;
     public $status;
-    public $errorText;
+    public $result;
 
-    public function __construct($project, $version, $type, $status, $errorText = "")
+    public function __construct($project, $version, $type, $migrationName, $status, $result = null)
     {
         $this->project = $project;
         $this->version = $version;
         $this->type = $type;
+        $this->migrationName = $migrationName;
         $this->status = $status;
-        $this->errorText = $errorText;
+        $this->result = $result ?? '';
 
         parent::__construct();
     }

@@ -204,7 +204,7 @@ class MessagingRdsMs
      */
     public function readMigrationStatus($sync, $callback)
     {
-        $this->readMessage(Message\ReleaseRequestMigrationStatus::type(), $callback, $sync);
+        $this->readMessage(Message\MigrationStatus::type(), $callback, $sync);
     }
 
     /**
@@ -228,9 +228,9 @@ class MessagingRdsMs
 
     /**
      * Сообщает RDS изменении статуса миграций сборки
-     * @param Message\ReleaseRequestMigrationStatus $message
+     * @param Message\MigrationStatus $message
      */
-    public function sendMigrationStatus(Message\ReleaseRequestMigrationStatus $message)
+    public function sendMigrationStatus(Message\MigrationStatus $message)
     {
         $this->writeMessage($message);
     }
