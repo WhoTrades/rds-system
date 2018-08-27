@@ -10,6 +10,7 @@ class MigrationStatus extends Base
     public $project;
     public $version;
     public $type;
+    public $migrationName;
     public $status;
     public $result;
 
