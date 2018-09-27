@@ -11,6 +11,7 @@ class ProjectConfig extends AbstractMultiServerTask
     public $project;
     public $configs = [];
     public $scriptUploadConfigLocal = '';
+    public $projectConfigHistoryId = null;
 
     /**
      * ProjectConfig constructor.
@@ -23,12 +24,14 @@ class ProjectConfig extends AbstractMultiServerTask
      * )
      * @param string $scriptUploadConfigLocal - sh скрипт по заливке конфигурации на сервера
      * @param array $projectServers - массив серверов для релиза
+     * @param int | null $projectConfigHistoryId
      */
-    public function __construct($project, array $configs, $scriptUploadConfigLocal, array $projectServers)
+    public function __construct($project, array $configs, $scriptUploadConfigLocal, array $projectServers, $projectConfigHistoryId)
     {
         $this->project  = $project;
         $this->configs   = $configs;
         $this->scriptUploadConfigLocal   = $scriptUploadConfigLocal;
+        $this->projectConfigHistoryId   = $projectConfigHistoryId;
 
         parent::__construct($projectServers);
     }

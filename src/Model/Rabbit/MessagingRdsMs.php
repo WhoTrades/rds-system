@@ -179,6 +179,25 @@ class MessagingRdsMs
     }
 
     /**
+     * Отправление результата раскладки нового конфига
+     * @param Message\ProjectConfig $message
+     */
+    public function sendProjectConfigResult(Message\ProjectConfigResult $message)
+    {
+        $this->writeMessage($message);
+    }
+
+    /**
+     * Получение результата раскладки нового конфига
+     * @param bool     $sync
+     * @param callable $callback
+     */
+    public function readProjectConfigResult($sync, $callback)
+    {
+        $this->readMessage(Message\ProjectConfigResult::type(), $callback, $sync);
+    }
+
+    /**
      * Сообщает RDS список новых pre и post миграций, которые попали в сборку
      * @param Message\ReleaseRequestMigrations $message
      */

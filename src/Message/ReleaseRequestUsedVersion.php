@@ -7,6 +7,7 @@ class ReleaseRequestUsedVersion extends Base
     public $project;
     public $version;
     public $initiatorUserName;
+    public $text;
 
     /**
      * ReleaseRequestUsedVersion constructor.
@@ -16,12 +17,13 @@ class ReleaseRequestUsedVersion extends Base
      * @param string $version
      * @param string $initiatorUserName
      */
-    public function __construct($worker, $project, $version, $initiatorUserName)
+    public function __construct($worker, $project, $version, $initiatorUserName, $text)
     {
         $this->worker = $worker;
         $this->project = $project;
         $this->version = $version;
         $this->initiatorUserName = $initiatorUserName;
+        $this->text = $text;
 
         parent::__construct();
     }
