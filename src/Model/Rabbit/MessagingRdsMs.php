@@ -90,7 +90,7 @@ class MessagingRdsMs
     {
         $timeout = $timeout ?: 0;
         if ($channel) {
-            while (count($channel->callbacks)) {
+            while (count($channel->callbacks) && $this->stopped === false) {
                 $channel->wait(null, true, $timeout);
                 if ($count > 0) {
                     $count--;
@@ -133,6 +133,7 @@ class MessagingRdsMs
                             throw $e;
                         }
                     }
+
                 }
             }
         }
@@ -514,7 +515,6 @@ class MessagingRdsMs
         }
 
         list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
-
         $channel = $this->createNewChannel($messageType);
         Yii::info("Listening $queueName [$exchangeName]");
 

@@ -16,8 +16,7 @@ abstract class RabbitListener extends SingleInstanceController
 
     protected function waitForMessages(MessagingRdsMs $model)
     {
-        declare(ticks = 1);
-        pcntl_signal_dispatch();
+        pcntl_async_signals(true);
         pcntl_signal(SIGTERM, array($this, 'onTerm'));
         pcntl_signal(SIGINT, array($this, 'onTerm'));
 
