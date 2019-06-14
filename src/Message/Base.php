@@ -30,6 +30,6 @@ class Base
 
     public function retry()
     {
-        $this->channel->basic_recover(true);
+        $this->channel->basic_nack($this->deliveryTag, false, true);
     }
 }
