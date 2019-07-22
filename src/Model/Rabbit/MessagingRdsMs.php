@@ -20,6 +20,9 @@ class MessagingRdsMs
     const MESSAGE_READ_TIMEOUT_MIN = 10*3600;
     const MESSAGE_READ_TIMEOUT_MAX = 20*3600;
 
+    const EXCHANGE_TYPE_DIRECT = 'direct';
+    const EXCHANGE_TYPE_FANOUT = 'fanout';
+
     private $env;
 
     private $stopped = false;
@@ -455,18 +458,9 @@ class MessagingRdsMs
         $this->readMessage(Message\UnixSignalToGroup::type($receiverName), $callback, $sync);
     }
 
-
-
-    private function declareAndGetQueueAndExchange($messageType)
-    {
-        $exchangeName = $queueName = $this->getExchangeName($messageType);
-
-        return [$exchangeName, $queueName];
-    }
-
     /**
      * @param Message\Base $message
-     * @param string       $receiverName
+     * @param string  $receiverName
      *
      * @return AMQPChannel
      */
@@ -474,58 +468,150 @@ class MessagingRdsMs
     {
         $receiverName = is_null($receiverName) ? '*' : $receiverName;
         $messageType = $message->type($receiverName);
-        list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
-        $rabbitMessage = new AMQPMessage(serialize($message));
-        $channel = $this->createNewChannel($messageType);
+        $exchangeName = $queueName = $this->addEnvPrefix($messageType);
 
-        Yii::info("Sending to $messageType");
-        $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
-
-        return $channel;
+        return $this->writeMessageToQueue($message, $exchangeName, $queueName);
     }
 
     /**
-     * @param $messageType
-     * @return \PhpAmqpLib\Channel\AMQPChannel
+     * @param Message\Base $message
+     *
+     * @return AMQPChannel
      */
-    private function createNewChannel($messageType)
+    protected function writeMessageToFanout(Message\Base $message)
     {
-        if (isset($this->channels[(string) $messageType])) {
-            return $this->channels[$messageType];
+        $messageType = $message->type();
+        $exchangeName = $this->addEnvPrefix($messageType);
+
+        return $this->writeMessageToQueue($message, $exchangeName, '', self::EXCHANGE_TYPE_FANOUT);
+    }
+
+    /**
+     * @param Message\Base $message
+     * @param string $exchangeName
+     * @param string $queueName
+     * @param string | null $exchangeType
+     * @param bool | null $queueExclusive
+     * @param bool | null $queueAutoDelete
+     *
+     * @return AMQPChannel
+     */
+    protected function writeMessageToQueue(Message\Base $message, $exchangeName, $queueName, $exchangeType = null, $queueExclusive = null, $queueAutoDelete = null)
+    {
+        $rabbitMessage = new AMQPMessage(serialize($message));
+
+        $channel = $this->createNewChannel($exchangeName, $queueName, $exchangeType, $queueExclusive, $queueAutoDelete);
+
+        Yii::info("Sending to queue {$queueName}, exchange {$exchangeName}");
+        $channel->basic_publish($rabbitMessage, $exchangeName, $queueName);
+
+        return $channel;
+
+    }
+
+    /**
+     * @param string $exchangeName
+     * @param string $queueName
+     * @param string | null $exchangeType
+     * @param bool | null $queueExclusive
+     * @param bool | null $queueAutoDelete
+     *
+     * @return AMQPChannel
+     */
+    private function createNewChannel($exchangeName, $queueName, $exchangeType = null, $queueExclusive = null, $queueAutoDelete = null)
+    {
+        $exchangeType = $exchangeType ?? self::EXCHANGE_TYPE_DIRECT;
+        $queueExclusive = $queueExclusive ?? false;
+        $queueAutoDelete = $queueAutoDelete ?? false;
+        $queueDurable = !($queueExclusive || $queueAutoDelete);
+
+        $channelId = $this->getChannelId($exchangeName, $queueName);
+        if (isset($this->channels[$channelId])) {
+            return $this->channels[$channelId];
         }
 
         $channel = $this->connection->channel();
-        $exchangeName = $queueName = $this->getExchangeName($messageType);
-        $channel->queue_declare($queueName, false, true, false, false);
-        $channel->exchange_declare($exchangeName, 'direct', false, true, false);
-        $channel->queue_bind($queueName, $exchangeName, $queueName);
 
-        return $this->channels[$messageType] = $channel;
+        if ($exchangeName) {
+            $channel->exchange_declare($exchangeName, $exchangeType, false, true, false);
+        }
+        if ($queueName) {
+            $channel->queue_declare($queueName, false, $queueDurable, $queueExclusive, $queueAutoDelete);
+        }
+        if ($exchangeName && $queueName) {
+            $channel->queue_bind($queueName, $exchangeName, $queueName);
+        }
+
+        return $this->channels[$channelId] = $channel;
     }
 
-    protected function getExchangeName($messageType)
+    /**
+     * @param string $exchangeName
+     * @param string $queueName
+     *
+     * @return string
+     */
+    protected function getChannelId($exchangeName, $queueName)
+    {
+        return $exchangeName . '-' . $queueName;
+    }
+
+    /**
+     * @param string $messageType
+     *
+     * @return string
+     */
+    protected function addEnvPrefix($messageType)
     {
         return $this->env . ":" . $messageType . ":";
     }
 
+    /**
+     * @param string $messageType
+     * @param callable $callback
+     * @param bool | null $sync
+     *
+     * @return AMQPChannel
+     */
     protected function readMessage($messageType, $callback, $sync = null)
     {
-        if ($sync === null) {
-            $sync = true;
-        }
+        $exchangeName = $queueName = $this->addEnvPrefix($messageType);
 
-        list($exchangeName, $queueName) = $this->declareAndGetQueueAndExchange($messageType);
-        $channel = $this->createNewChannel($messageType);
-        Yii::info("Listening $queueName [$exchangeName]");
+        return $this->readMessageFromQueue($callback, $exchangeName, $queueName, null, null, null, $sync);
+    }
 
-        $channel->basic_consume($queueName, $exchangeName, false, false, false, false, function ($message) use ($callback, $channel) {
-            $reply = unserialize($message->body);
-            $reply->deliveryTag = $message->delivery_info['delivery_tag'];
-            $reply->channel = $channel;
-            Yii::info("[x] Message received {$reply->deliveryTag}");
+    /**
+     * @param callable $callback
+     * @param string $exchangeName
+     * @param string $queueName
+     * @param bool | null $sync
+     *
+     * @return AMQPChannel
+     */
+    protected function readMessageFromFanout($callback, $exchangeName, $queueName, $sync = null)
+    {
+        $exchangeName = $this->addEnvPrefix($exchangeName);
+        $queueName = $this->addEnvPrefix($queueName);
 
-            $callback($reply);
-        });
+        return $this->readMessageFromQueue($callback, $exchangeName, $queueName, self::EXCHANGE_TYPE_FANOUT, $queueExclusive = true, null, $sync);
+    }
+
+    /**
+     * @param callable $callback
+     * @param string $exchangeName
+     * @param string $queueName
+     * @param string | null $exchangeType
+     * @param bool | null $queueExclusive
+     * @param bool | null $queueAutoDelete
+     * @param bool | null $sync
+     *
+     * @return AMQPChannel
+     */
+    protected function readMessageFromQueue($callback, $exchangeName, $queueName, $exchangeType = null, $queueExclusive = null, $queueAutoDelete = null, $sync = null)
+    {
+        $sync = $sync ?? false;
+
+        $channel = $this->consumeQueue($callback, $exchangeName, $queueName, $exchangeType, $queueExclusive, $queueAutoDelete);
 
         if ($sync) {
             try {
@@ -538,7 +624,33 @@ class MessagingRdsMs
         return $channel;
     }
 
+    /**
+     * @param callable $callback
+     * @param string $exchangeName
+     * @param string $queueName
+     * @param string | null $exchangeType
+     * @param bool | null $queueExclusive
+     * @param bool | null $queueAutoDelete
+     *
+     * @return AMQPChannel
+     */
+    protected function consumeQueue($callback, $exchangeName, $queueName, $exchangeType = null, $queueExclusive = null, $queueAutoDelete = null)
+    {
+        $channel = $this->createNewChannel($exchangeName, $queueName, $exchangeType, $queueExclusive, $queueAutoDelete);
+        Yii::info("Listening $queueName [$exchangeName]");
 
+        $consumerTag = $this->getChannelId($exchangeName, $queueName);
+        $channel->basic_consume($queueName, $consumerTag, false, false, false, false, function ($message) use ($callback, $channel) {
+            $reply = unserialize($message->body);
+            $reply->deliveryTag = $message->delivery_info['delivery_tag'];
+            $reply->channel = $channel;
+            Yii::info("[x] Message received {$reply->deliveryTag}");
+
+            $callback($reply);
+        });
+
+        return $channel;
+    }
 
     private function cancelAll()
     {

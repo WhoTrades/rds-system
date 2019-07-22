@@ -23,6 +23,14 @@ class Base
         return get_called_class() . "::" . $receiverName;
     }
 
+    /**
+     * @return string
+     */
+    public static function getUniqueReceiverName()
+    {
+        return md5(getmypid() . microtime(true));
+    }
+
     public function accepted()
     {
         $this->channel->basic_ack($this->deliveryTag);
