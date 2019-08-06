@@ -328,7 +328,7 @@ class MessagingRdsMs
     }
 
     /**
-     * Выдает новое задание на сборку
+     * Получает новое задание на сборку
      * @param string   $receiverName
      * @param bool     $sync
      * @param callable $callback
@@ -346,6 +346,27 @@ class MessagingRdsMs
     public function sendBuildTask($receiverName, Message\BuildTask $buildTask)
     {
         $this->writeMessage($buildTask, $receiverName);
+    }
+
+    /**
+     * Получает новое задание на раскладку
+     * @param string   $receiverName
+     * @param bool     $sync
+     * @param callable $callback
+     */
+    public function getInstallTask($receiverName, $sync, $callback)
+    {
+        $this->readMessage(Message\InstallTask::type($receiverName), $callback, $sync);
+    }
+
+    /**
+     * Выдает новое задание на раскладку
+     * @param string            $receiverName
+     * @param Message\InstallTask $installTask
+     */
+    public function sendInstallTask($receiverName, Message\InstallTask $installTask)
+    {
+        $this->writeMessage($installTask, $receiverName);
     }
 
     /**

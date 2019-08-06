@@ -1,16 +1,10 @@
 <?php
 namespace whotrades\RdsSystem\Message;
 
-class BuildTask extends AbstractMultiServerTask
+class BuildTask extends DeployTaskBase
 {
-    public $id;
-    public $project;
-    public $version;
-    public $release;
-    public $lastBuildTag;
     public $scriptMigrationNew;
     public $scriptBuild;
-    public $scriptDeploy;
     public $scriptCron;
 
     /**
@@ -19,25 +13,17 @@ class BuildTask extends AbstractMultiServerTask
      * @param string $project
      * @param string $version
      * @param string $release
-     * @param string $lastBuildTag
      * @param string $scriptMigrationNew
      * @param string $scriptBuild
-     * @param string $scriptDeploy
      * @param string $scriptCron
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($id, $project, $version, $release, $lastBuildTag, $scriptMigrationNew, $scriptBuild, $scriptDeploy, $scriptCron, array $projectServers)
+    public function __construct($id, $project, $version, $release, $scriptMigrationNew, $scriptBuild, $scriptCron, array $projectServers)
     {
-        $this->id = $id;
-        $this->project = $project;
-        $this->version = $version;
-        $this->release = $release;
-        $this->lastBuildTag = $lastBuildTag;
         $this->scriptMigrationNew = $scriptMigrationNew;
         $this->scriptBuild = $scriptBuild;
-        $this->scriptDeploy = $scriptDeploy;
         $this->scriptCron = $scriptCron;
 
-        parent::__construct($projectServers);
+        parent::__construct($id, $project, $version, $release, $projectServers);
     }
 }
