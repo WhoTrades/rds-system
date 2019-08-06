@@ -11,6 +11,7 @@ use whotrades\RdsSystem\Message;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 use Yii;
 
 class MessagingRdsMs
@@ -22,6 +23,8 @@ class MessagingRdsMs
 
     const EXCHANGE_TYPE_DIRECT = 'direct';
     const EXCHANGE_TYPE_FANOUT = 'fanout';
+
+    const QUEUE_AUTO_DELETE_TTL = 30; // ag: 30 sec
 
     private $env;
 
@@ -545,6 +548,12 @@ class MessagingRdsMs
         $queueExclusive = $queueExclusive ?? false;
         $queueAutoDelete = $queueAutoDelete ?? false;
         $queueDurable = !($queueExclusive || $queueAutoDelete);
+        $queueNowait = false;
+        $queueArguments = [];
+
+        if ($queueAutoDelete) {
+            $queueArguments['x-expires'] = self::QUEUE_AUTO_DELETE_TTL * 1000;
+        }
 
         $channelId = $this->getChannelId($exchangeName, $queueName);
         if (isset($this->channels[$channelId])) {
@@ -557,7 +566,7 @@ class MessagingRdsMs
             $channel->exchange_declare($exchangeName, $exchangeType, false, true, false);
         }
         if ($queueName) {
-            $channel->queue_declare($queueName, false, $queueDurable, $queueExclusive, $queueAutoDelete);
+            $channel->queue_declare($queueName, false, $queueDurable, $queueExclusive, $queueAutoDelete, $queueNowait, new AMQPTable($queueArguments));
         }
         if ($exchangeName && $queueName) {
             $channel->queue_bind($queueName, $exchangeName, $queueName);
