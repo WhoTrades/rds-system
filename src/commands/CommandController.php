@@ -56,7 +56,7 @@ abstract class CommandController extends SingleInstanceController
         $interval = $interval ?? '* * * * * *';
         $command = $this->convertCommandClassNameToCommandName($className);
 
-        $params[] = '--sys__key=' . $this->getCommandKey($className, $params);
+        $params[] = '--sys__key=' . $this->getCommandKey($className, $action, $params);
 
         if ($this->package) {
             $params[] = '--sys__package=' . $this->package;
@@ -65,13 +65,20 @@ abstract class CommandController extends SingleInstanceController
         return "$interval $this->user cd $this->projectPath && php yii.php $command/$action " . implode(" ", $params) . " | logger -p local2.info -t $tagName";
     }
 
-    private function getCommandKey($className, $parameters)
+    /**
+     * @param string $className
+     * @param string $action
+     * @param array $parameters
+     *
+     * @return bool|string
+     */
+    private function getCommandKey($className, $action, array $parameters)
     {
         if ($this->package) {
             $parameters[] = '--sys__package=' . preg_replace('~-[\d.]+$~', '', $this->package);
         }
 
-        return substr(md5($className . ":" . implode(", ", $parameters)), 0, 12);
+        return substr(md5($className . "/" . $action . ":" . implode(", ", $parameters)), 0, 12);
     }
 
     private function convertCommandClassNameToCommandName($className)
