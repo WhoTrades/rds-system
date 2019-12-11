@@ -83,7 +83,6 @@ class MessagingRdsMs
     public function stopReceivingMessages()
     {
         $this->stopped = true;
-
         $this->cancelAll();
     }
 
@@ -96,7 +95,7 @@ class MessagingRdsMs
     {
         $timeout = $timeout ?: 0;
         if ($channel) {
-            while (count($channel->callbacks) && $this->stopped === false) {
+            while (count($channel->callbacks) && !$this->stopped) {
                 $channel->wait(null, true, $timeout);
                 if ($count > 0) {
                     $count--;
@@ -107,7 +106,7 @@ class MessagingRdsMs
             }
         } else {
             $t = microtime(true);
-            for (;;) {
+            while (!$this->stopped) {
                 foreach ($this->channels as $key => $channel) {
                     try {
                         for ($i = 0; $i < 10; $i++) {
@@ -118,8 +117,6 @@ class MessagingRdsMs
                             }
 
                             if ($this->stopped) {
-                                $this->stopped = false;
-
                                 return;
                             }
                         }
@@ -130,16 +127,13 @@ class MessagingRdsMs
                             }
                         }
                     } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
-                        if ($this->stopped) {
-                            $this->stopped = false;
-
-                            return;
-                        }
                         if ($timeout && (microtime(true) - $t > $timeout)) {
                             throw $e;
                         }
                     }
-
+                    if ($this->stopped) {
+                        return;
+                    }
                 }
             }
         }
