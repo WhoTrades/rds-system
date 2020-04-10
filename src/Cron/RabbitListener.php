@@ -9,11 +9,11 @@ use yii\base\ExitException;
 
 abstract class RabbitListener extends SingleInstanceController
 {
-    const CHECK_STILL_CAN_RNU_INTERVAL = 5;
     const ENV = 'main';
 
     private $stopped = false;
 
+    // ag: Can be set via console command param --maxDuration=...
     public $maxDuration = 300;
 
     /**

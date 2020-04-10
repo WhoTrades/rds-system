@@ -4,7 +4,7 @@ namespace whotrades\RdsSystem\Message;
 
 class MigrationStatus extends Base
 {
-    const STATUS_UP = 'up';
+    const STATUS_SUCCESS = 'success';
     const STATUS_FAILED = 'failed';
 
     public $project;

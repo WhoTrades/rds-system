@@ -26,9 +26,16 @@ class CommandExecutor
         Yii::info("Executing `$commandWithEnv`");
         exec($commandWithEnv, $output, $returnVar);
         $text = implode("\n", $output);
-
-        if ($returnVar) {
-            throw new CommandExecutorException($commandWithEnv, "Return var is non-zero, code=$returnVar, command=$commandWithEnv", $returnVar, $text);
+        if ($returnVar === 1 && $text === '') {
+            // an: grep возвращает exit-code=1, если вернулось 0 строк
+            return $text;
+        } elseif ($returnVar) {
+            throw new CommandExecutorException(
+                $commandWithEnv,
+                "Return var is non-zero, code=$returnVar, command=$commandWithEnv, output=$text",
+                $returnVar,
+                $text
+            );
         }
 
         return $text;

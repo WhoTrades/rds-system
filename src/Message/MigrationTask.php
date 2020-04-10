@@ -7,6 +7,7 @@ class MigrationTask extends Base
     public $version;
     public $type;
     public $migrationName;
+    public $migrationCommand;
     public $scriptMigrationUp;
 
     /**
@@ -15,14 +16,17 @@ class MigrationTask extends Base
      * @param string $version
      * @param string $type
      * @param string $scriptMigrationUp
+     * @param string $migrationCommand
+     * @param string | null $migrationName
      */
-    public function __construct($project, $version, $type, $scriptMigrationUp, $migrationName = null)
+    public function __construct($project, $version, $type, $scriptMigrationUp, $migrationCommand, $migrationName = null)
     {
         $this->project = $project;
         $this->version = $version;
         $this->type = $type;
-        $this->migrationName = $migrationName ?? '';
         $this->scriptMigrationUp = $scriptMigrationUp;
+        $this->migrationCommand = $migrationCommand;
+        $this->migrationName = $migrationName ?? '';
 
         parent::__construct();
     }
