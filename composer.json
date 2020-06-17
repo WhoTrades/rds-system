@@ -1,11 +1,24 @@
 {
   "name": "whotrades/rds-system",
   "type": "library",
-  "author": "Artem Naumenko (entsupml@gmail.com)",
+  "authors": [
+    {
+      "name": "Artem Naumenko",
+      "email": "entsupml@gmail.com"
+    }
+  ],
   "description": "Core part of RDS service",
   "autoload": {
     "psr-4": {
       "whotrades\\RdsSystem\\": "src/"
     }
+  },
+  "require": {
+    "php": ">=7.3",
+    "ext-pcntl": "*",
+    "yiisoft/yii2": "2.0.15.1",
+    "sentry/sentry": "1.6.2",
+    "mito/yii2-sentry": "~1.0.0",
+    "php-amqplib/php-amqplib": "~2.6"
   }
 }
