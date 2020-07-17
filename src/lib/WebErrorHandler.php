@@ -3,6 +3,13 @@ namespace whotrades\RdsSystem\lib;
 
 use Yii;
 
+/**
+ * Class WebErrorHandler
+ *
+ * @package whotrades\RdsSystem\lib
+ *
+ * @deprecated
+ */
 class WebErrorHandler extends \yii\web\ErrorHandler
 {
     /**
@@ -11,10 +18,6 @@ class WebErrorHandler extends \yii\web\ErrorHandler
      */
     public function logException($exception)
     {
-        /** @var $sentry \mito\sentry\Component */
-        $sentry = Yii::$app->sentry;
-        $sentry->captureException($exception);
-
         return parent::logException($exception);
     }
 }
