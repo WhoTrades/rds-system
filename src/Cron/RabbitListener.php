@@ -1,7 +1,6 @@
 <?php
 namespace whotrades\RdsSystem\Cron;
 
-use Raven_Client;
 use whotrades\RdsSystem\Model\Rabbit\MessagingRdsMs;
 use Yii;
 use whotrades\RdsSystem\Factory;
@@ -74,10 +73,7 @@ abstract class RabbitListener extends SingleInstanceController
     {
         $this->stopReceivingMessages();
 
-        /** @var $sentry \mito\sentry\Component */
-        $sentry = Yii::$app->sentry;
-        $sentry->captureMessage("tool terminated by SIGTERM", ['signo' => $signo], Raven_Client::FATAL, true);
-        Yii::error("tool terminated without termination behavior");
+        Yii::error("tool terminated by SIGTERM (signo={$signo})");
 
         throw new ExitException();
     }
