@@ -17,9 +17,7 @@ class CommandExecutorException extends \Exception
      */
     public function __construct($command, $message, $code, $output, $previous = null)
     {
-        if (empty($message)) {
-            $message = "Command execution error";
-        }
+        $message = $message ?: "Command execution error";
         $this->output = $output;
         $this->command = $command;
         parent::__construct($message, $code, $previous);
