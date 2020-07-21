@@ -1,6 +1,7 @@
 <?php
 namespace whotrades\RdsSystem\lib;
 
+use whotrades\RdsSystem\lib\Exception\CommandExecutorException;
 use Yii;
 
 class CommandExecutor
