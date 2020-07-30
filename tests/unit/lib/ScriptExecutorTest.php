@@ -6,6 +6,7 @@
  */
 declare(strict_types=1);
 
+use \org\bovigo\vfs\vfsStreamDirectory;
 use \org\bovigo\vfs\vfsStreamFile;
 use \PHPUnit\Framework\MockObject\MockObject;
 use \PHPUnit\Framework\TestCase;
@@ -18,7 +19,7 @@ use \whotrades\RdsSystem\lib\ScriptExecutor;
 
 class ScriptExecutorTest extends TestCase
 {
-    /** @var \org\bovigo\vfs\vfsStreamDirectory  */
+    /** @var vfsStreamDirectory  */
     private $root;
 
     public function setUp(): void
@@ -34,7 +35,7 @@ class ScriptExecutorTest extends TestCase
     /**
      * @throws ScriptExecutorException
      * @throws CommandExecutorException
-     * @throws \whotrades\RdsSystem\lib\Exception\FilesystemException
+     * @throws FilesystemException
      */
     public function testScriptExecutor()
     {
@@ -46,7 +47,7 @@ class ScriptExecutorTest extends TestCase
     /**
      * @throws ScriptExecutorException
      * @throws CommandExecutorException
-     * @throws \whotrades\RdsSystem\lib\Exception\FilesystemException
+     * @throws FilesystemException
      */
     public function testDoubleDip()
     {
