@@ -34,7 +34,6 @@ class ScriptExecutor
     /**
      * @return string
      *
-     * @throws CommandExecutorException
      * @throws FilesystemException
      * @throws ScriptExecutorException
      */
@@ -44,7 +43,7 @@ class ScriptExecutor
             throw new ScriptExecutorException("Script already executed");
         }
 
-        $commandExecutor = new CommandExecutor(); // no need to pass as dependency for now
+        $commandExecutor = $this->getCommandExecutor();
         $scriptPath = $this->getScriptPath();
 
         $scriptDirectoryPath = dirname($scriptPath);
@@ -60,7 +59,7 @@ class ScriptExecutor
             if (!chmod($scriptPath, 0777)) {
                 throw new FilesystemException("Can't set permissions for a file: {$scriptPath}", FilesystemException::ERROR_PERMISSIONS);
             }
-            $output = $commandExecutor->executeCommand("{$this->script} 2>&1", $this->env);
+            $output = $commandExecutor->executeCommand("{$scriptPath} 2>&1", $this->env);
         } catch (CommandExecutorException $e) {
             throw new ScriptExecutorException("Exception was thrown while executing command with script", 0, $e, $this->script);
         } finally {
@@ -77,6 +76,14 @@ class ScriptExecutor
     public function getScriptPath(): string
     {
         return $this->scriptPathPrefix . uniqid() . ".sh";
+    }
+
+    /**
+     * @return CommandExecutor
+     */
+    public function getCommandExecutor(): CommandExecutor
+    {
+        return new CommandExecutor();
     }
 
     /**
