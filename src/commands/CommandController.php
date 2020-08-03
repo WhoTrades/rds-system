@@ -31,10 +31,6 @@ abstract class CommandController extends SingleInstanceController
         $this->user = $user;
         $this->projectPath = $projectPath;
 
-        if (realpath($projectPath) == false) {
-            throw new \InvalidArgumentException("Path $projectPath not found");
-        }
-
         $list = $this->getCommands();
 
         $this->stdout(implode("\n", $list) . "\n");
