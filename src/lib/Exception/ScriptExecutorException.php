@@ -21,4 +21,12 @@ class ScriptExecutorException extends \Exception
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * @return mixed|string
+     */
+    public function getScript()
+    {
+        return $this->script;
+    }
+
 }
