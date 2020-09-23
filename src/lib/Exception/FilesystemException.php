@@ -16,6 +16,7 @@ class FilesystemException extends \Exception
 {
     const ERROR_WRITE_DIRECTORY = 100;
     const ERROR_WRITE_FILE      = 101;
+    const ERROR_PERMISSIONS     = 102;
 
     /**
      * FilesystemException constructor.
@@ -42,6 +43,8 @@ class FilesystemException extends \Exception
                 return "Can't create directory";
             case self::ERROR_WRITE_FILE:
                 return "Can't write into file";
+            case self::ERROR_PERMISSIONS:
+                return "Can't set permissions";
         }
 
         return "Filesystem error";
