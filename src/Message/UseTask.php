@@ -9,6 +9,7 @@ class UseTask extends AbstractMultiServerTask
     public $initiatorUserName;
     public $scriptUse;
     public $scriptPostUse;
+    public $cronConfig;
 
     /**
      * UseTask constructor.
@@ -19,9 +20,10 @@ class UseTask extends AbstractMultiServerTask
      * @param string $initiatorUserName - имя того, кто нажал use
      * @param string $scriptUse - скрипт активации сборки
      * @param string $scriptPostUse - post activation script
+     * @param string $cronConfig - cron configuration string
      * @param array $projectServers - массив серверов для релиза
      */
-    public function __construct($project, $releaseRequestId, $version, $initiatorUserName, $scriptUse, $scriptPostUse, array $projectServers)
+    public function __construct($project, $releaseRequestId, $version, $initiatorUserName, $scriptUse, $scriptPostUse, $cronConfig, array $projectServers)
     {
         $this->project = $project;
         $this->releaseRequestId = $releaseRequestId;
@@ -29,6 +31,7 @@ class UseTask extends AbstractMultiServerTask
         $this->initiatorUserName = $initiatorUserName;
         $this->scriptUse = $scriptUse;
         $this->scriptPostUse = $scriptPostUse;
+        $this->cronConfig = $cronConfig;
 
         parent::__construct($projectServers);
     }
