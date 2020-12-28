@@ -409,25 +409,6 @@ class MessagingRdsMs
     }
 
     /**
-     * @param $workerName
-     * @param $sync
-     * @param $callback
-     */
-    public function getUseCronTask($workerName, $sync, $callback)
-    {
-        $this->readMessage(Message\UseCronTask::type($workerName), $callback, $sync);
-    }
-
-    /**
-     * @param $receiverName
-     * @param Message\UseCronTask $message
-     */
-    public function sendUseCronTask($receiverName, Message\UseCronTask $message)
-    {
-        $this->writeMessage($message, $receiverName);
-    }
-
-    /**
      * Выдает новое задание на KILL
      * @param string   $workerName
      * @param bool     $sync
