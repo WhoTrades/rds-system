@@ -12,16 +12,16 @@ class MigrationStatus extends Base
     public $type;
     public $migrationName;
     public $status;
-    public $result;
+    public $error;
 
-    public function __construct($project, $version, $type, $migrationName, $status, $result = null)
+    public function __construct($project, $version, $type, $migrationName, $status, $error = null)
     {
         $this->project = $project;
         $this->version = $version;
         $this->type = $type;
         $this->migrationName = $migrationName;
         $this->status = $status;
-        $this->result = $result ?? '';
+        $this->error = $error ?? '';
 
         parent::__construct();
     }
