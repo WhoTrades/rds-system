@@ -59,7 +59,7 @@ class ScriptExecutor
             if (!chmod($scriptPath, 0777)) {
                 throw new FilesystemException("Can't set permissions for a file: {$scriptPath}", FilesystemException::ERROR_PERMISSIONS);
             }
-            $output = $commandExecutor->executeCommand("{$scriptPath} 2>&1", $this->env);
+            $output = $commandExecutor->executeCommand("/bin/bash {$scriptPath} 2>&1", $this->env);
         } catch (CommandExecutorException $e) {
             throw new ScriptExecutorException("Exception was thrown while executing command with script", 0, $e, $this->script);
         } finally {
